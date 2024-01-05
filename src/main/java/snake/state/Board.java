@@ -1,10 +1,7 @@
 package snake.state;
 
-import snake.Snake;
-
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +21,10 @@ public class Board implements BoardEntity {
         this.snakes = Collections.emptyList();
     }
 
+    public Cell getCell(int x, int y) {
+        return cells[x][y];
+    }
+
     @Override
     public Iterable<CellEntity> getCells() {
         return Arrays.stream(cells)
@@ -39,5 +40,20 @@ public class Board implements BoardEntity {
                 cell.destroy();
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        for (var row : cells) {
+            for (var cell : row) {
+                builder.append(cell);
+            }
+
+            builder.append("\n");
+        }
+
+        return builder.toString();
     }
 }

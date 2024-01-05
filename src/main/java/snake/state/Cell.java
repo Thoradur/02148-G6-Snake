@@ -36,6 +36,24 @@ public final class Cell implements BoardEntity, Point {
 
     @Override
     public void destroy() {
-        this.stack.clear();
+        while (!stack.isEmpty()) {
+            stack.pop().destroy();
+        }
+    }
+
+    @Override
+    public String toString() {
+        // # is a snake
+        // * is food
+        // . is an empty cell
+
+        if (stack.isEmpty())
+            return ".";
+
+
+        if (stack.peek() instanceof SnakeCell snakeCell)
+            return snakeCell.isHead() ? "H" : (snakeCell.isTail() ? "T" : "#");
+
+        return "*";
     }
 }

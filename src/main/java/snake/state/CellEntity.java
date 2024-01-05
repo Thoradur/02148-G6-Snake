@@ -1,6 +1,5 @@
 package snake.state;
 
-import java.util.ArrayList;
 import java.util.Collections;
 
 public abstract class CellEntity implements BoardEntity, Point {
@@ -9,6 +8,11 @@ public abstract class CellEntity implements BoardEntity, Point {
     public CellEntity(Cell parent) {
         this.parent = parent;
         parent.getStack().push(this);
+    }
+
+    @Override
+    public int hashCode() {
+        return getIndex(1000);
     }
 
     public Cell getParent() {
