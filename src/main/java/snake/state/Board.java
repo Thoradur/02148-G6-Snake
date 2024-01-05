@@ -21,6 +21,10 @@ public class Board implements BoardEntity {
         this.snakes = Collections.emptyList();
     }
 
+    public Cell getCell(Point point) {
+        return getCell(point.getX(), point.getY());
+    }
+
     public Cell getCell(int x, int y) {
         return cells[x][y];
     }

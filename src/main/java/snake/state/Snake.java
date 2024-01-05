@@ -25,40 +25,15 @@ public class Snake implements BoardEntity {
     }
 
     public static Snake createSnakeFromCompactSnake(Board board, List<Point> compactSnake) {
-        Point prevPoint = compactSnake.removeFirst();
+        Snake snake = new Snake(new LinkedList<>());
 
-        var snake = new Snake(board.getCell(prevPoint.getX(), prevPoint.getY()));
+        Direction direction = null;
+        Point prevPoint = compactSnake.getFirst();
 
-        while (!compactSnake.isEmpty()) {
-            var point = compactSnake.removeFirst();
-
-            if (point.equals(prevPoint) && !compactSnake.isEmpty()) {
-                throw new RuntimeException("Invalid compact snake, duplicate point not in tail");
-            }
-
-            var prevX = prevPoint.getX();
-            var prevY = prevPoint.getY();
-
-            var x = point.getX();
-            var y = point.getY();
-
-            if (prevX != x && prevY != y) {
-                throw new RuntimeException("Invalid compact snake, diagonal movement");
-            }
-
-            int dx = x - prevX;
-            int dy = y - prevY;
-
-            if (dx < 0 || dy < 0) {
-                throw new RuntimeException("Invalid compact snake, movement is not forward");
-            }
-
-            for (int i = 0; i < dx; i++) {
-                snake.move(board.getCell(prevX + i, prevY));
-            }
-
-            for (int i = 0; i < dy; i++) {
-                snake.move(board.getCell(x, prevY + i));
+        for (var point : compactSnake) {
+            for (var int_point : PointRef.interpolate(prevPoint, point).reversed()) {
+                var cell = board.getCell(int_point);
+                snake.appendTail(cell);
             }
 
             prevPoint = point;
@@ -78,27 +53,23 @@ public class Snake implements BoardEntity {
     public List<Point> getCompactSnake() {
         List<Point> compactSnake = new ArrayList<>();
 
-        compactSnake.add(new PointRef(snake.getFirst()));
-
         Direction direction = null;
-        SnakeCell prevCell = null;
-
-        var iterator = snake.iterator();
+        SnakeCell prevCell = snake.getFirst();
 
         for (var cell : snake) {
-            Direction newDirection = prevCell != null ? Direction.betweenPoints(prevCell, cell) : null;
+            var newDirection = Direction.betweenPoints(prevCell, cell);
 
             if (cell.isHead() || cell.isTail()) {
+                // Always include every head and tail
                 compactSnake.add(new PointRef(cell));
-                continue;
-            }
 
-            if (direction != newDirection) {
+            } else if (direction != newDirection) {
+                // Only include turning points
                 compactSnake.add(new PointRef(prevCell));
             }
 
-            prevCell = cell;
             direction = newDirection;
+            prevCell = cell;
         }
 
         return compactSnake;
@@ -137,7 +108,7 @@ public class Snake implements BoardEntity {
         });
     }
 
-    // Visible lenght (Unique cells)
+    // Visible length (Unique cells)
     public int length() {
         HashSet<Integer> seenIndices = new HashSet<>();
 

@@ -50,7 +50,7 @@ public class SnakeTest {
         board.destroy();
 
         Assert.assertEquals(0, snake.size());
-        
+
         Assert.assertEquals(3, compactSnake.size());
 
         Snake recoveredSnake = Snake.createSnakeFromCompactSnake(board, compactSnake);
