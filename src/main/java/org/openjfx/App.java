@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -20,9 +21,8 @@ public class App extends Application {
 
         var label = new Label("Hello, JavaFX " + javafxVersion + ", running on Java " + javaVersion + ".");
         var coolButton = new Button("Coooool");
-        coolButton.setPrefHeight(100);
 
-        var stack = new StackPane(new VBox(label, coolButton));
+        var stack = new StackPane(new HBox(label, coolButton));
         var scene = new Scene(stack, 640, 480);
 
         stage.setScene(scene);
