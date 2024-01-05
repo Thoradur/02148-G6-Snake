@@ -86,24 +86,19 @@ public class Snake implements BoardEntity {
         var iterator = snake.iterator();
 
         for (var cell : snake) {
-            Direction newDirection = Direction.betweenPoints(prevCell, cell);
+            Direction newDirection = prevCell != null ? Direction.betweenPoints(prevCell, cell) : null;
 
-
-            prevCell = cell;
-        }
-
-
-        for (var cell : snake) {
-            Direction newDirection = Direction.betweenPoints(compactSnake.getLast(), cell);
-
-            System.out.println("Direction: " + newDirection + " at point " + cell);
-
-            if (cell.isTail() || !cell.isHead() && direction != null && !direction.equals(newDirection)) {
+            if (cell.isHead() || cell.isTail()) {
                 compactSnake.add(new PointRef(cell));
+                continue;
             }
 
-            direction = newDirection;
+            if (direction != newDirection) {
+                compactSnake.add(new PointRef(prevCell));
+            }
 
+            prevCell = cell;
+            direction = newDirection;
         }
 
         return compactSnake;
