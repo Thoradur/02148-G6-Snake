@@ -3,12 +3,16 @@ package snake.state;
 import java.util.Comparator;
 
 public interface Point extends Comparable<Point>, Comparator<Point> {
-    public int getX();
+    int getX();
 
-    public int getY();
+    int getY();
 
     default int getIndex(int width) {
         return getY() * width + getX();
+    }
+
+    default Point add(Point other) {
+        return new PointRef(getX() + other.getX(), getY() + other.getY());
     }
 
     @Override

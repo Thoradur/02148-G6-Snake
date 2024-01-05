@@ -3,10 +3,10 @@ package snake.state;
 import java.util.Comparator;
 
 public enum Direction implements Comparable<Direction>, Comparator<Direction> {
-    UP(0, 1),
-    DOWN(0, -1),
-    LEFT(-1, 0),
-    RIGHT(1, 0);
+    UP(-1, 0),
+    DOWN(1, 0),
+    LEFT(0, -1),
+    RIGHT(0, 1);
 
     public final int x;
     public final int y;
@@ -14,6 +14,10 @@ public enum Direction implements Comparable<Direction>, Comparator<Direction> {
     Direction(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+
+    public Point add(Point point) {
+        return new PointRef(point.getX() + x, point.getY() + y);
     }
 
     public static Direction betweenPoints(Point p1, Point p2) {
