@@ -1,35 +1,24 @@
 import snake.common.Direction;
 import snake.common.Point;
+import snake.protocol.MessageFactory;
+import snake.protocol.coordination.JoinLobby;
+import snake.protocol.coordination.LeaveLobby;
+import snake.protocol.coordination.ListLobbies;
 import snake.state.Snake;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
 public class TestApp {
-    public static void main(String[] args) {
-        Snake snake = new Snake(new Point(1, 1), Direction.RIGHT);
+    public static void main(String[] args) throws InvocationTargetException, IllegalAccessException {
+        System.out.println(Arrays.toString(MessageFactory.toTemplateUnion(JoinLobby.class, LeaveLobby.class)));
 
-        snake.move();
-        snake.move();
+        String lobbyName = "test";
 
-        snake.setDirection(Direction.DOWN);
+        var joinLobby = new JoinLobby(lobbyName);
+        var leaveLobby = new LeaveLobby(lobbyName);
 
-        snake.move();
-        snake.move();
-
-        snake.grow(3);
-
-        snake.setDirection(Direction.RIGHT);
-
-        snake.move();
-        snake.move();
-        snake.move();
-
-        var dehydratedSnake = snake.getDehydratedSnake();
-
-        Snake snake2 = new Snake(dehydratedSnake);
-
-        System.out.println(snake);
-        System.out.println(snake2);
+        System.out.println(Arrays.toString(MessageFactory.toTemplateUnion(joinLobby, leaveLobby)));
     }
 }

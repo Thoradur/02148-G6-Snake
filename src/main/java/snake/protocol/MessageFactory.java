@@ -11,10 +11,30 @@ import java.util.HashMap;
 import java.util.Set;
 
 public class MessageFactory {
+    private static class MessageValueEmpty {
+    }
+
     private static class MessageInfo {
         public String name;
         public Constructor<?> constructor;
         public HashMap<String, RecordComponent> recordComponents = new HashMap<>();
+
+        public boolean isCompatibleWith(MessageInfo other) {
+            if (recordComponents.size() != other.recordComponents.size()) {
+                return false;
+            }
+
+            for (var recordComponent : recordComponents.values()) {
+                for (var otherRecordComponent : other.recordComponents.values()) {
+                    // We only care about order and type
+                    if (!recordComponent.getType().equals(otherRecordComponent.getType())) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
     }
 
     private static final HashMap<Class<?>, MessageInfo> messages = new HashMap<>();
@@ -102,11 +122,73 @@ public class MessageFactory {
         return template;
     }
 
-    public static TemplateField[] toTemplateUnion(Object... messages) {
-        // Find the most general type
-        Integer desiredLength = null;
+    public static TemplateField[] toTemplateUnion(Class<?>... messageTypes) {
+        if (messageTypes.length == 0) {
+            throw new RuntimeException("No messages provided");
+        }
 
-        return null;
+        // Ensure that all messages are of the same type
+        for (var mi : messageTypes) {
+            var infoi = getMessageInfo(mi);
+
+            for (var mj : messageTypes) {
+                if (mi == mj) {
+                    continue;
+                }
+
+                var infoj = getMessageInfo(mj);
+
+                if (!infoi.isCompatibleWith(infoj)) {
+                    throw new RuntimeException("Messages are not compatible");
+                }
+            }
+        }
+
+        // Return fully generic template
+        var info = getMessageInfo(messageTypes[0]);
+
+        TemplateField[] template = new TemplateField[info.recordComponents.size() + 1];
+
+        template[0] = new FormalField(String.class);
+
+        int i = 1;
+
+        for (var recordComponent : info.recordComponents.values()) {
+            template[i] = new FormalField(recordComponent.getType());
+            i++;
+        }
+
+        return template;
+    }
+
+    public static TemplateField[] toTemplateUnion(Object... messages) throws InvocationTargetException, IllegalAccessException {
+        var types = Arrays.stream(messages).map(Object::getClass).toArray(Class<?>[]::new);
+        var template = toTemplateUnion(types);
+
+        Object[] valuesAtIndices = new Object[template.length - 1];
+
+        Arrays.fill(valuesAtIndices, new MessageValueEmpty());
+
+        for (var message : messages) {
+            var info = getMessageInfo(message);
+
+            int i = 0;
+
+            for (var recordComponent : info.recordComponents.values()) {
+                var previousValue = valuesAtIndices[i];
+                var value = recordComponent.getAccessor().invoke(message);
+
+                if (previousValue instanceof MessageValueEmpty) {
+                    valuesAtIndices[i] = value;
+                } else if (!previousValue.equals(value)) {
+                    throw new RuntimeException("Messages are not compatible");
+                }
+                template[i + 1] = new ActualField(valuesAtIndices[i]);
+                i++;
+            }
+        }
+
+        return template;
     }
 
     public static Object[] toTuple(Object message) throws IllegalAccessException, InvocationTargetException {
