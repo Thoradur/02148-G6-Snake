@@ -1,137 +1,137 @@
 package snake.state;
 
-import java.util.*;
+import snake.common.Direction;
+import snake.common.Point;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.LinkedList;
 import java.util.stream.IntStream;
 
-public class Snake implements BoardEntity {
+public class Snake {
+    private final LinkedList<Point> snake = new LinkedList<>();
+    private Direction direction;
 
-    private final LinkedList<SnakeCell> snake;
-
-    public Snake(LinkedList<SnakeCell> snake) {
-        this.snake = snake;
-    }
-
-    public Snake(Cell startPosition) {
-        this.snake = new LinkedList<>();
-        this.snake.add(new SnakeCell(this, startPosition));
-    }
-
-    public SnakeCell getHead() {
-        return snake.getFirst();
-    }
-
-    public SnakeCell getTail() {
-        return snake.getLast();
-    }
-
-    public static Snake createSnakeFromCompactSnake(Board board, List<Point> compactSnake) {
-        Snake snake = new Snake(new LinkedList<>());
-
-        Direction direction = null;
-        Point prevPoint = compactSnake.getFirst();
-
-        for (var point : compactSnake) {
-            for (var int_point : PointRef.interpolate(prevPoint, point).reversed()) {
-                var cell = board.getCell(int_point);
-                snake.appendTail(cell);
-            }
-
-            prevPoint = point;
-        }
-
-        return snake;
+    public Snake(Point startPosition, Direction startDirection) {
+        snake.add(startPosition);
+        direction = startDirection;
     }
 
     /**
-     * Convert the linked list into the minimal amount of cells needed to represent the snake.
-     * That being the head, the tail and every turning point.
-     * Snake: [(0,2), (1, 2), (2,2), (2, 1), (1, 1), (1, 0), (0, 0)]
-     * Becomes: [(0,2), (2,2), (2, 1), (1, 1), (1, 0), (0, 0)]
-     *
-     * @return Cell[]
+     * Instantiate a snake based on a minimal amount of information.
      */
-    public List<Point> getCompactSnake() {
-        List<Point> compactSnake = new ArrayList<>();
+    public Snake(List<Point> dehydratedSnake) {
+        if (dehydratedSnake.isEmpty()) return;
 
-        Direction direction = null;
-        SnakeCell prevCell = snake.getFirst();
+        var tail = dehydratedSnake.getLast();
 
-        for (var cell : snake) {
-            var newDirection = Direction.betweenPoints(prevCell, cell);
-
-            if (cell.isHead() || cell.isTail()) {
-                // Always include every head and tail
-                compactSnake.add(new PointRef(cell));
-
-            } else if (direction != newDirection) {
-                // Only include turning points
-                compactSnake.add(new PointRef(prevCell));
+        for (var anchorPoint : dehydratedSnake) {
+            if (snake.isEmpty()) {
+                snake.addLast(anchorPoint);
+                continue;
             }
 
-            direction = newDirection;
-            prevCell = cell;
-        }
+            var prevPoint = snake.getLast();
 
-        return compactSnake;
-    }
+            direction = Direction.fromPoints(anchorPoint, prevPoint);
 
-    public void removeCell(SnakeCell cell) {
-        snake.remove(cell);
-    }
-
-    private void removeTail() {
-        snake.removeLast().destroy();
-    }
-
-    private void appendTail(Cell cell) {
-        snake.addLast(new SnakeCell(this, cell));
-    }
-
-    public void move(Cell nextCell) {
-        // TODO add check to ensure dist is equal to 1
-        snake.addFirst(new SnakeCell(this, nextCell));
-        removeTail();
-    }
-
-    /**
-     * Growing stacks the given amount of cells on top of the last cell.
-     */
-    public void grow(int size) {
-        // Either pop or append depending on if size is negative or positive
-        IntStream.range(0, Math.abs(size)).forEach(i -> {
-            if (size < 0) {
-                removeTail();
-                return;
+            if (prevPoint.equals(anchorPoint) && !anchorPoint.equals(tail)) {
+                throw new IllegalArgumentException("Snake is malformed: " + dehydratedSnake);
             }
 
-            appendTail(snake.getLast().getParent());
-        });
-    }
+            if (prevPoint.distanceTo(anchorPoint) < 2) {
+                snake.addLast(anchorPoint);
+                continue;
+            }
 
-    // Visible length (Unique cells)
-    public int length() {
-        HashSet<Integer> seenIndices = new HashSet<>();
-
-        for (var cell : snake) {
-            seenIndices.add(cell.getParent().hashCode());
+            try {
+                anchorPoint.interpolateTo(prevPoint).toList().reversed().forEach(snake::addLast);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Snake is malformed at: " + anchorPoint + ", " + prevPoint);
+            }
         }
-
-        return seenIndices.size();
     }
 
     public int size() {
         return snake.size();
     }
 
-    @Override
-    public void destroy() {
-        while (!snake.isEmpty()) {
-            snake.removeLast().destroy();
+    public int length() {
+        HashSet<Point> uniquePoints = new HashSet<>(snake);
+        return uniquePoints.size();
+    }
+
+    public void move() {
+        snake.addFirst(getHead().add(this.direction));
+        snake.removeLast();
+    }
+
+    public void grow(int size) {
+        boolean isGrowing = size > 0;
+
+        IntStream.range(0, Math.abs(size)).forEach(i -> {
+            // Either pop or append depending on if size is negative or positive
+            if (!isGrowing) {
+                snake.removeLast();
+                return;
+            }
+
+            // Make tail stack when growing
+            snake.addLast(getTail());
+        });
+    }
+
+    public void setDirection(Direction direction) {
+        this.direction = direction;
+    }
+
+    public Point getHead() {
+        return snake.getFirst();
+    }
+
+    public Point getTail() {
+        return snake.getLast();
+    }
+
+    public List<Point> getDehydratedSnake() {
+        List<Point> dehydratedSnake = new ArrayList<>();
+        Direction direction = this.direction;
+
+        dehydratedSnake.add(getHead());
+
+        for (var point : snake) {
+            var prevPoint = dehydratedSnake.getLast();
+            var newDirection = Direction.fromPoints(prevPoint, point);
+
+            if (newDirection != direction) {
+                dehydratedSnake.add(point);
+                direction = newDirection;
+                continue;
+            }
+
+            if (getTail().equals(point)) {
+                dehydratedSnake.add(point);
+            }
         }
+
+        return dehydratedSnake;
     }
 
     @Override
-    public Iterable<CellEntity> getCells() {
-        return Collections.unmodifiableList(snake);
+    public String toString() {
+        StringBuilder stringSnake = new StringBuilder();
+
+        for (var point : this.snake) {
+            stringSnake.append(point.toString());
+
+            if (point == this.snake.getLast()) continue;
+
+            stringSnake.append(" -> ");
+        }
+
+        stringSnake.append('\n');
+
+        return stringSnake.toString();
     }
 }

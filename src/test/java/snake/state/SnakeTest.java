@@ -1,62 +1,36 @@
 package snake.state;
 
-import org.junit.Assert;
-import org.junit.Test;
-import snake.state.*;
 
-import java.util.Arrays;
-import java.util.List;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
+import snake.common.Direction;
+import snake.common.Point;
+
+import java.util.Random;
 
 public class SnakeTest {
-    @Test
-    public void testSnake() {
-        // Small 3x3 board
-        Board board = new Board(3, 3);
 
-        // Snake starting at (0, 0)
-        Snake snake = new Snake(board.getCell(0, 0));
+    @RepeatedTest(10)
+    public void testSnakeDehydration() {
+        int steps = 10;
 
-        // Give it room to grow
-        snake.grow(3);
+        Random random = new Random();
 
-        Assert.assertEquals(1, snake.length());
+        Snake s1 = new Snake(new Point(random.nextInt(10), random.nextInt(10)), Direction.random(random));
 
-        // Move snake to (1, 0)
-        snake.move(board.getCell(1, 0));
+        for (int i = 0; i < steps; i++) {
+            s1.move();
+            s1.grow(random.nextInt(3));
+            s1.setDirection(Direction.random(random));
+        }
 
-        Assert.assertEquals(2, snake.length());
+        var dehydratedSnake = s1.getDehydratedSnake();
 
-        // Move snake to (2, 0)
+        System.out.println(dehydratedSnake);
 
-        snake.move(board.getCell(2, 0));
+        Snake s2 = new Snake(dehydratedSnake);
 
-        Assert.assertEquals(3, snake.length());
-
-        // Move snake to (2, 1)
-
-        snake.move(board.getCell(2, 1));
-
-        Assert.assertEquals(4, snake.length());
-
-        System.out.println(board);
-
-        List<Point> compactSnake = snake.getCompactSnake();
-
-        System.out.println(Arrays.toString(compactSnake.toArray()));
-        Assert.assertTrue(compactSnake.get(0).equals(new PointRef(2, 1)));
-        Assert.assertTrue(compactSnake.get(1).equals(new PointRef(2, 0)));
-        Assert.assertTrue(compactSnake.get(2).equals(new PointRef(0, 0)));
-
-        board.destroy();
-
-        Assert.assertEquals(0, snake.size());
-
-        Assert.assertEquals(3, compactSnake.size());
-
-        Snake recoveredSnake = Snake.createSnakeFromCompactSnake(board, compactSnake);
-
-        System.out.println(board);
-
-        Assert.assertEquals(4, recoveredSnake.length());
+        Assertions.assertEquals(s1.size(), s2.size());
     }
 }
