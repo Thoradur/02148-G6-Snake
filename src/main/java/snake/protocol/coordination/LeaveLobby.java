@@ -2,6 +2,6 @@ package snake.protocol.coordination;
 
 import snake.protocol.Message;
 
-@Message(name = "leaveLobby")
+@Message(name = "leaveLobby", compact = true)
 public record LeaveLobby(String lobbyName) {
 }

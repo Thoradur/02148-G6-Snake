@@ -3,223 +3,134 @@ package snake.protocol;
 import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.TemplateField;
-import org.reflections.Reflections;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Set;
 
-public class MessageFactory {
-    private static class MessageValueEmpty {
+public class MessageFactory<T extends Record> {
+    public final String name;
+    public final Class<T> type;
+    public final Message messageAnnotation;
+    public final Constructor<?> constructor;
+    public final RecordComponent[] recordComponents;
+    public final TemplateField[] templateFields;
+
+    public MessageFactory(Class<?> type) {
+        if (!type.isRecord()) {
+            throw new RuntimeException("Class " + type.getName() + " is annotated with @Message but is not a record");
+        }
+
+        this.type = (Class<T>) type;
+
+        this.messageAnnotation = type.getAnnotation(Message.class);
+
+        if (this.messageAnnotation == null) {
+            throw new RuntimeException("Class " + type.getName() + " is a record but is not annotated with @Message");
+        }
+
+        if (this.messageAnnotation.name().isEmpty()) {
+            this.name = type.getSimpleName();
+        } else {
+            this.name = this.messageAnnotation.name();
+        }
+
+        var constructor = Arrays.stream(type.getConstructors()).findFirst();
+
+        if (constructor.isEmpty()) {
+            throw new RuntimeException("Class " + type.getName() + " is annotated with @Message but has no constructor");
+        }
+
+        this.constructor = constructor.get();
+
+        this.recordComponents = type.getRecordComponents();
+
+        if (this.messageAnnotation.compact()) {
+            this.templateFields = new TemplateField[]{new ActualField(name), new FormalField(Record.class)};
+            return;
+        }
+
+        this.templateFields = new TemplateField[recordComponents.length + 1];
+        this.templateFields[0] = new ActualField(name);
+        for (int i = 0; i < recordComponents.length; i++) {
+            templateFields[i + 1] = new FormalField(recordComponents[i].getType());
+        }
     }
 
-    private static class MessageInfo {
-        public String name;
-        public Constructor<?> constructor;
-        public HashMap<String, RecordComponent> recordComponents = new HashMap<>();
-
-        public boolean isCompatibleWith(MessageInfo other) {
-            if (recordComponents.size() != other.recordComponents.size()) {
-                return false;
-            }
-
-            for (var recordComponent : recordComponents.values()) {
-                for (var otherRecordComponent : other.recordComponents.values()) {
-                    // We only care about order and type
-                    if (!recordComponent.getType().equals(otherRecordComponent.getType())) {
-                        return false;
-                    }
-                }
-            }
-
+    public boolean isCompatibleWith(MessageFactory<?> other) {
+        if (other.messageAnnotation.compact() == messageAnnotation.compact()) {
             return true;
         }
-    }
 
-    private static final HashMap<Class<?>, MessageInfo> messages = new HashMap<>();
-    private static final HashMap<String, Class<?>> messageNames = new HashMap<>();
-
-    static {
-        loadMessages();
-    }
-
-    public static void loadMessages() {
-        // Find all classes annotated with @Message
-        Set<Class<?>> annotated = new Reflections("snake").getTypesAnnotatedWith(Message.class);
-
-        for (Class<?> cls : annotated) {
-            // Check if the class is a record
-            if (!cls.isRecord()) {
-                throw new RuntimeException("Class " + cls.getName() + " is annotated with @Message but is not a record");
-            }
-
-            MessageInfo info = new MessageInfo();
-            info.name = cls.getAnnotation(Message.class).name();
-
-            if (info.name.isEmpty()) {
-                info.name = cls.getSimpleName();
-            }
-
-            // Find empty constructor
-            Arrays.stream(cls.getConstructors()).findFirst().ifPresent(constructor -> {
-                info.constructor = constructor;
-            });
-
-            // Check if the constructor is empty
-            if (info.constructor == null) {
-                throw new RuntimeException("Class " + cls.getName() + " is annotated with @Message but has no empty constructor");
-            }
-
-            // Find all fields
-            for (var recordComponent : cls.getRecordComponents()) {
-                info.recordComponents.put(recordComponent.getName(), recordComponent);
-            }
-
-            messages.put(cls, info);
-            messageNames.put(info.name, cls);
-        }
-    }
-
-    private static MessageInfo getMessageInfo(Class<?> type) {
-        var info = messages.get(type);
-
-        if (info == null) {
-            throw new RuntimeException("Class " + type.getName() + " is not annotated with @Message");
+        if (recordComponents.length != other.recordComponents.length) {
+            return false;
         }
 
-        return info;
+        for (int i = 0; i < recordComponents.length; i++) {
+            if (recordComponents[i].getType().equals(other.recordComponents[i].getType())) {
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 
-    private static MessageInfo getMessageInfo(String name) {
-        return getMessageInfo(messageNames.get(name));
+    public TemplateField[] toTemplate() {
+        return templateFields.clone();
     }
 
-    private static MessageInfo getMessageInfo(Object message) {
-        return getMessageInfo(message.getClass());
-    }
+    public TemplateField[] toTemplate(T message) throws IllegalAccessException, InvocationTargetException {
+        TemplateField[] template = this.toTemplate();
 
-    public static TemplateField[] toTemplate(Object message) throws IllegalAccessException, InvocationTargetException {
-        var info = getMessageInfo(message);
-
-        TemplateField[] template = new TemplateField[info.recordComponents.size() + 1];
-        template[0] = new ActualField(info.name);
-
-        int i = 1;
-
-        for (var recordComponent : info.recordComponents.values()) {
-            var value = recordComponent.getAccessor().invoke(message);
+        for (int i = 0; i < recordComponents.length; i++) {
+            var value = recordComponents[i].getAccessor().invoke(message);
 
             if (value == null) {
-                template[i] = new FormalField(recordComponent.getType());
-            } else {
-                template[i] = new ActualField(value);
+                continue;
             }
 
-            i++;
+            template[i + 1] = new ActualField(value);
         }
 
         return template;
     }
 
-    public static TemplateField[] toTemplateUnion(Class<?>... messageTypes) {
-        if (messageTypes.length == 0) {
-            throw new RuntimeException("No messages provided");
+    public Object[] toTuple(T message) throws IllegalAccessException, InvocationTargetException {
+        Object[] tuple = new Object[templateFields.length];
+        tuple[0] = name;
+
+        if (messageAnnotation.compact()) {
+            tuple[1] = message;
+            return tuple;
         }
 
-        // Ensure that all messages are of the same type
-        for (var mi : messageTypes) {
-            var infoi = getMessageInfo(mi);
-
-            for (var mj : messageTypes) {
-                if (mi == mj) {
-                    continue;
-                }
-
-                var infoj = getMessageInfo(mj);
-
-                if (!infoi.isCompatibleWith(infoj)) {
-                    throw new RuntimeException("Messages are not compatible");
-                }
-            }
-        }
-
-        // Return fully generic template
-        var info = getMessageInfo(messageTypes[0]);
-
-        TemplateField[] template = new TemplateField[info.recordComponents.size() + 1];
-
-        template[0] = new FormalField(String.class);
-
-        int i = 1;
-
-        for (var recordComponent : info.recordComponents.values()) {
-            template[i] = new FormalField(recordComponent.getType());
-            i++;
-        }
-
-        return template;
-    }
-
-    public static TemplateField[] toTemplateUnion(Object... messages) throws InvocationTargetException, IllegalAccessException {
-        var types = Arrays.stream(messages).map(Object::getClass).toArray(Class<?>[]::new);
-        var template = toTemplateUnion(types);
-
-        Object[] valuesAtIndices = new Object[template.length - 1];
-
-        Arrays.fill(valuesAtIndices, new MessageValueEmpty());
-
-        for (var message : messages) {
-            var info = getMessageInfo(message);
-
-            int i = 0;
-
-            for (var recordComponent : info.recordComponents.values()) {
-                var previousValue = valuesAtIndices[i];
-                var value = recordComponent.getAccessor().invoke(message);
-
-                if (previousValue instanceof MessageValueEmpty) {
-                    valuesAtIndices[i] = value;
-                } else if (!previousValue.equals(value)) {
-                    throw new RuntimeException("Messages are not compatible");
-                }
-                template[i + 1] = new ActualField(valuesAtIndices[i]);
-                i++;
-            }
-        }
-
-        return template;
-    }
-
-    public static Object[] toTuple(Object message) throws IllegalAccessException, InvocationTargetException {
-        var info = getMessageInfo(message);
-
-        Object[] tuple = new Object[info.recordComponents.size() + 1];
-
-        tuple[0] = info.name;
-
-        int i = 1;
-
-        for (var recordComponent : info.recordComponents.values()) {
-            tuple[i] = recordComponent.getAccessor().invoke(message);
-            i++;
+        for (int i = 0; i < recordComponents.length; i++) {
+            tuple[i + 1] = recordComponents[i].getAccessor().invoke(message);
         }
 
         return tuple;
     }
 
-    public static Record fromTuple(Object[] tuple) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        var info = getMessageInfo((String) tuple[0]);
-
-        Object[] args = new Object[info.recordComponents.size()];
-
-        int i = 0;
-
-        for (var ignored : info.recordComponents.values()) {
-            args[i] = tuple[i + 1];
-            i++;
+    public T fromTuple(Object[] tuple) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+        if (tuple.length == 0) {
+            return null;
         }
 
-        return (Record) info.constructor.newInstance(args);
+        if (!tuple[0].equals(name)) {
+            throw new RuntimeException("Expected message type " + name + " but got " + tuple[0]);
+        }
+
+        if (messageAnnotation.compact()) {
+            return (T) tuple[1];
+        }
+
+        Object[] args = new Object[recordComponents.length];
+
+        System.arraycopy(tuple, 1, args, 0, recordComponents.length);
+
+        return (T) constructor.newInstance(args);
     }
 }
