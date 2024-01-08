@@ -28,19 +28,14 @@ class SnakeGame{
     private static final int SCREEN_HEIGHT = 600;
     private static final int CELL_SIZE = 25;
 
-    private static final int RIGHT = 0;
-    private static final int LEFT = 1;
-    private static final int UP = 2;
-    private static final int DOWN = 3;
-    private  int currentDirection;
+    public static Snake[] snake = new Snake[1];
+    public static fruit[] fruit = new fruit[5];
 
-    private List<Point> snakeBody = new ArrayList();
-    private Point snakeHead;
-    private static final int startLength = 3;
+    public static 
 
     private GraphicsContext gc;
 
-    public void start(Stage stage){
+    public void start(Stage stage) {
 
         stage.setTitle("SnakeGame");
         Group root = new Group(); //HOLDS BUTTON
@@ -50,82 +45,27 @@ class SnakeGame{
         stage.setScene(scene);
         stage.show();
         gc = canvas.getGraphicsContext2D();
+        Snake snake1 = new Snake(gc, scene);
+        snake[0] = snake1;
 
-        //KEYBOARD INPUT
-        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent keyEvent) {
-                switch (keyEvent.getCode()){
-                    case W:
-                        if (currentDirection != DOWN){
-                            currentDirection = UP;
-                        }
-                        System.out.println("w");
-                        break;
-                    case A:
-                        if (currentDirection != RIGHT){
-                            currentDirection = LEFT;
-                        }
-                        System.out.println("A");
-                        break;
-                    case S:
-                        if (currentDirection != UP){
-                            currentDirection = DOWN;
-                        }
-                        System.out.println("S");
-                        break;
-                    case D:
-                        if (currentDirection != LEFT){
-                            currentDirection = RIGHT;
-                        }
-                        System.out.println("D");
-                        break;
-                }
-            }
-        });
+        for (int i = 0; i < fruit.length; i++) {
+            fruit[i] = new fruit(gc, scene);
 
-        for (int i = 0; i < startLength; i++){
-            snakeBody.add(new Point(SCREEN_WIDTH/2/CELL_SIZE, SCREEN_HEIGHT/2/CELL_SIZE + i));
         }
-        snakeHead = snakeBody.get(0);
-        Timeline timeline = new Timeline(new KeyFrame(Duration.millis(500), e -> run(gc)));
+
+
+        Timeline timeline = new Timeline(new KeyFrame(Duration.millis(100), e -> run(gc)));
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
     }
-
-    private void run(GraphicsContext gc){
-        drawBackground(gc);
-        drawSnake(gc);
-
-        for (int i = snakeBody.size() - 1; i > 0; i--){
-            snakeBody.get(i).x = snakeBody.get(i-1).x;
-            snakeBody.get(i).y = snakeBody.get(i-1).y;
-        }
-
-        switch (currentDirection){
-            case RIGHT:
-                moveRight();
-                break;
-            case LEFT:
-                moveLeft();
-                break;
-            case UP:
-                moveUp();
-                break;
-            case DOWN:
-                moveDown();
-                break;
-        }
-
-    }
-
-    public void drawBackground(GraphicsContext gc){
-        //draws background
-        for(int i = 0; i < SCREEN_WIDTH/CELL_SIZE; i++){
-            for(int j = 0; j < SCREEN_HEIGHT/CELL_SIZE; j++){
-                if ((i + j) % 2 == 0){
-                    gc.setFill(Color.web("cbd1c5"));}
-                else{
+    
+    public void drawBackground(GraphicsContext gc) {
+        // draws background
+        for (int i = 0; i < SCREEN_WIDTH / CELL_SIZE; i++) {
+            for (int j = 0; j < SCREEN_HEIGHT / CELL_SIZE; j++) {
+                if ((i + j) % 2 == 0) {
+                    gc.setFill(Color.web("cbd1c5"));
+                } else {
                     gc.setFill(Color.web("bdc4b7"));
                 }
                 gc.fillRect(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE);
@@ -133,30 +73,27 @@ class SnakeGame{
         }
     }
 
+    private void collision() {
+        for(int j = 0; j < fruit.length; j++){
+                if (snake[i].snakeHead.x == fruit[j].position.x && snake[i].snakeHead.y == fruit[j].position.y) {
+                    fruit[j].randomizePosition();
+                    snake[i].grow();
+                }
+            }
+    }
 
-    private void drawSnake(GraphicsContext gc){
-        //draws snake
-        gc.setFill(Color.web("FF0000"));
-        gc.fillRect(snakeHead.getX()*CELL_SIZE, snakeHead.getY()*CELL_SIZE, CELL_SIZE-1, CELL_SIZE-1);
-
-        for (int i = 1; i < snakeBody.size(); i++){
-            gc.fillRoundRect(snakeBody.get(i).getX()*CELL_SIZE, snakeBody.get(i).getY()*CELL_SIZE, CELL_SIZE-1, CELL_SIZE-1, 20, 20);
+    private void run(GraphicsContext gc) {
+        drawBackground(gc);
+        for (int i = 0; i < fruit.length; i++) {
+            fruit[i].run(gc);
         }
-
+        
+        for(int i = 0; i  < 1 /*snake.length*/; i++){
+            snake[i].run(gc);
+        }
+        
     }
-
-    private void moveRight(){
-        snakeHead.x ++;
-    }
-    private void moveLeft(){
-        snakeHead.x --;
-    }
-    private void moveUp(){
-        snakeHead.y --;
-    }
-    private  void moveDown(){
-        snakeHead.y ++;
-    }
+   
 
 
 
