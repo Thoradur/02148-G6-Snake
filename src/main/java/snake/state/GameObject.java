@@ -1,9 +1,11 @@
 package snake.state;
 
+import snake.protocol.state.Fragment;
+
 public interface GameObject {
     int getStep();
 
-    void step();
+    Fragment step();
 
     void build(Board board);
 }

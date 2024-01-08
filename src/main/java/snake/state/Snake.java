@@ -2,6 +2,7 @@ package snake.state;
 
 import snake.common.Direction;
 import snake.common.Point;
+import snake.protocol.state.Fragment;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -37,10 +38,11 @@ public class Snake implements GameObject {
         return step;
     }
 
-    public void step() {
+    public Fragment step() {
         step++;
         snake.addFirst(getHead().add(this.direction));
         snake.removeLast();
+        return new Fragment(step, getDehydratedSnake().toArray(new Point[0]), true);
     }
 
     public void grow(int size) {

@@ -1,5 +1,7 @@
 package snake.state;
 
+import snake.protocol.state.Fragment;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
