@@ -3,13 +3,11 @@ package snake.state;
 import snake.common.Direction;
 import snake.common.Point;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.stream.IntStream;
 
-public class Snake {
+public class Snake implements GameObject {
+    private int step = 0;
     private final LinkedList<Point> snake = new LinkedList<>();
     private Direction direction;
 
@@ -22,35 +20,7 @@ public class Snake {
      * Instantiate a snake based on a minimal amount of information.
      */
     public Snake(List<Point> dehydratedSnake) {
-        if (dehydratedSnake.isEmpty()) return;
-
-        var tail = dehydratedSnake.getLast();
-
-        for (var anchorPoint : dehydratedSnake) {
-            if (snake.isEmpty()) {
-                snake.addLast(anchorPoint);
-                continue;
-            }
-
-            var prevPoint = snake.getLast();
-
-            direction = Direction.fromPoints(anchorPoint, prevPoint);
-
-            if (prevPoint.equals(anchorPoint) && !anchorPoint.equals(tail)) {
-                throw new IllegalArgumentException("Snake is malformed: " + dehydratedSnake);
-            }
-
-            if (prevPoint.distanceTo(anchorPoint) < 2) {
-                snake.addLast(anchorPoint);
-                continue;
-            }
-
-            try {
-                anchorPoint.interpolateTo(prevPoint).toList().reversed().forEach(snake::addLast);
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Snake is malformed at: " + anchorPoint + ", " + prevPoint);
-            }
-        }
+        setDehydratedSnake(dehydratedSnake);
     }
 
     public int size() {
@@ -62,7 +32,13 @@ public class Snake {
         return uniquePoints.size();
     }
 
-    public void move() {
+    @Override
+    public int getStep() {
+        return step;
+    }
+
+    public void step() {
+        step++;
         snake.addFirst(getHead().add(this.direction));
         snake.removeLast();
     }
@@ -116,6 +92,51 @@ public class Snake {
         }
 
         return dehydratedSnake;
+    }
+
+    public void setDehydratedSnake(List<Point> dehydratedSnake) {
+        snake.clear();
+
+        if (dehydratedSnake.isEmpty()) return;
+
+        var tail = dehydratedSnake.getLast();
+
+        for (var anchorPoint : dehydratedSnake) {
+            if (snake.isEmpty()) {
+                snake.addLast(anchorPoint);
+                continue;
+            }
+
+            var prevPoint = snake.getLast();
+
+            direction = Direction.fromPoints(anchorPoint, prevPoint);
+
+            if (prevPoint.equals(anchorPoint) && !anchorPoint.equals(tail)) {
+                throw new IllegalArgumentException("Snake is malformed: " + dehydratedSnake);
+            }
+
+            if (prevPoint.distanceTo(anchorPoint) < 2) {
+                snake.addLast(anchorPoint);
+                continue;
+            }
+
+            try {
+                anchorPoint.interpolateTo(prevPoint).toList().reversed().forEach(snake::addLast);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Snake is malformed at: " + anchorPoint + ", " + prevPoint);
+            }
+        }
+    }
+
+    @Override
+    public void build(Board board) {
+
+
+        for (var point : snake) {
+            var cell = board.getCell(point);
+
+            cell.getStack().push(this);
+        }
     }
 
     @Override

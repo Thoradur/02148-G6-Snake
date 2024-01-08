@@ -1,5 +1,7 @@
 package snake.state;
 
-public abstract class Fragment {
+import snake.common.Point;
 
+public abstract class Fragment {
+    Point[] compactSnake;
 }

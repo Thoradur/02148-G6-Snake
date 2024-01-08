@@ -90,7 +90,7 @@ public class MessageRegistry {
         }
 
         var messageFactory = getMessageFactory(messageTypes[0]);
-        var template =  messageFactory.toTemplate();
+        var template = messageFactory.toTemplate();
 
         // Ensure that the first field is a string
         template[0] = new FormalField(String.class);
