@@ -58,6 +58,10 @@ public class Snake implements GameObject {
         });
     }
 
+    public Direction getDirection() {
+        return direction;
+    }
+
     public void setDirection(Direction direction) {
         this.direction = direction;
     }
@@ -68,6 +72,10 @@ public class Snake implements GameObject {
 
     public Point getTail() {
         return snake.getLast();
+    }
+
+    public LinkedList<Point> getSnake() {
+        return snake;
     }
 
     public List<Point> getDehydratedSnake() {

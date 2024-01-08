@@ -1,5 +1,7 @@
 package snake;
 
+import javafx.stage.Stage;
+import org.openjfx.SnakeGame;
 import snake.common.Direction;
 import snake.common.Point;
 import snake.protocol.Message;
@@ -30,6 +32,8 @@ public class TestApp {
 
 
         while (true) {
+
+
             board.build();
             state.getGameObjects().forEach(GameObject::step);
             // CLear

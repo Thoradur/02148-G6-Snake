@@ -20,7 +20,6 @@ public class SnakeTest {
         Snake s1 = new Snake(new Point(random.nextInt(10), random.nextInt(10)), Direction.random(random));
 
         for (int i = 0; i < steps; i++) {
-            s1.move();
             s1.grow(random.nextInt(3));
             s1.setDirection(Direction.random(random));
         }

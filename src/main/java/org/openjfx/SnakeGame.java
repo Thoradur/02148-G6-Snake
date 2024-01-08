@@ -15,35 +15,41 @@ import javafx.stage.Stage;
 import javafx.scene.*;
 
 
-import java.awt.Point;
+import snake.common.Point;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
 import javafx.animation.*;
 import javafx.util.Duration;
+import snake.common.Direction;
+import snake.state.Board;
+import snake.state.Snake;
+import snake.state.State;
 
 
-
-class SnakeGame{
+public class SnakeGame{
     private static final int SCREEN_WIDTH = 600;
     private static final int SCREEN_HEIGHT = 600;
     private static final int CELL_SIZE = 25;
-
-    private static final int RIGHT = 0;
-    private static final int LEFT = 1;
-    private static final int UP = 2;
-    private static final int DOWN = 3;
-    private  int currentDirection;
-
-    private List<Point> snakeBody = new ArrayList();
-    private Point snakeHead;
-    private static final int startLength = 3;
+    private static final int START_LENGTH = 3;
 
     private GraphicsContext gc;
+    private Board board;
+    private State state;
+    private Snake snake;
 
     public void start(Stage stage){
+        state = new State();
+        board = new Board(SCREEN_WIDTH/CELL_SIZE, SCREEN_HEIGHT/CELL_SIZE, state);
+        snake = new Snake(new Point(SCREEN_WIDTH/2/CELL_SIZE, SCREEN_HEIGHT/2/CELL_SIZE), Direction.random(new Random()));
 
+        //adds stuff to board
+        state.getGameObjects().add(snake);
+
+        //crates window
         stage.setTitle("SnakeGame");
-        Group root = new Group(); //HOLDS BUTTON
+        Group root = new Group();
         Canvas canvas = new Canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
         root.getChildren().add(canvas);
         Scene scene = new Scene(root);
@@ -57,26 +63,26 @@ class SnakeGame{
             public void handle(KeyEvent keyEvent) {
                 switch (keyEvent.getCode()){
                     case W:
-                        if (currentDirection != DOWN){
-                            currentDirection = UP;
+                        if (snake.getDirection() != Direction.DOWN){
+                            snake.setDirection(Direction.UP);
                         }
                         System.out.println("w");
                         break;
                     case A:
-                        if (currentDirection != RIGHT){
-                            currentDirection = LEFT;
+                        if (snake.getDirection() != Direction.RIGHT){
+                            snake.setDirection(Direction.LEFT);
                         }
                         System.out.println("A");
                         break;
                     case S:
-                        if (currentDirection != UP){
-                            currentDirection = DOWN;
+                        if (snake.getDirection() != Direction.UP){
+                            snake.setDirection(Direction.DOWN);
                         }
                         System.out.println("S");
                         break;
                     case D:
-                        if (currentDirection != LEFT){
-                            currentDirection = RIGHT;
+                        if (snake.getDirection() != Direction.LEFT){
+                            snake.setDirection(Direction.RIGHT);
                         }
                         System.out.println("D");
                         break;
@@ -84,43 +90,32 @@ class SnakeGame{
             }
         });
 
-        for (int i = 0; i < startLength; i++){
-            snakeBody.add(new Point(SCREEN_WIDTH/2/CELL_SIZE, SCREEN_HEIGHT/2/CELL_SIZE + i));
-        }
-        snakeHead = snakeBody.get(0);
+        snake.grow(START_LENGTH);
+
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(500), e -> run(gc)));
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
     }
 
     private void run(GraphicsContext gc){
+        // Draws background and snake on screen
         drawBackground(gc);
         drawSnake(gc);
 
-        for (int i = snakeBody.size() - 1; i > 0; i--){
-            snakeBody.get(i).x = snakeBody.get(i-1).x;
-            snakeBody.get(i).y = snakeBody.get(i-1).y;
-        }
+        // Updates the snake and board
+        board.build();
+        snake.step();
 
-        switch (currentDirection){
-            case RIGHT:
-                moveRight();
-                break;
-            case LEFT:
-                moveLeft();
-                break;
-            case UP:
-                moveUp();
-                break;
-            case DOWN:
-                moveDown();
-                break;
-        }
+
+
+
+
+
 
     }
 
     public void drawBackground(GraphicsContext gc){
-        //draws background
+        // Draws background
         for(int i = 0; i < SCREEN_WIDTH/CELL_SIZE; i++){
             for(int j = 0; j < SCREEN_HEIGHT/CELL_SIZE; j++){
                 if ((i + j) % 2 == 0){
@@ -136,27 +131,16 @@ class SnakeGame{
 
     private void drawSnake(GraphicsContext gc){
         //draws snake
-        gc.setFill(Color.web("FF0000"));
-        gc.fillRect(snakeHead.getX()*CELL_SIZE, snakeHead.getY()*CELL_SIZE, CELL_SIZE-1, CELL_SIZE-1);
+        gc.setFill(Color.web("00FF00"));
+        gc.fillRect(snake.getHead().x()*CELL_SIZE, snake.getHead().y()*CELL_SIZE, CELL_SIZE-1, CELL_SIZE-1);
 
-        for (int i = 1; i < snakeBody.size(); i++){
-            gc.fillRoundRect(snakeBody.get(i).getX()*CELL_SIZE, snakeBody.get(i).getY()*CELL_SIZE, CELL_SIZE-1, CELL_SIZE-1, 20, 20);
+        var snakeBody = snake.getSnake();
+        for (int i = 1; i < snakeBody.size() ; i++){
+            gc.fillRoundRect(snakeBody.get(i).x()*CELL_SIZE, snakeBody.get(i).y()*CELL_SIZE, CELL_SIZE-1, CELL_SIZE-1, 20, 20);
         }
 
     }
 
-    private void moveRight(){
-        snakeHead.x ++;
-    }
-    private void moveLeft(){
-        snakeHead.x --;
-    }
-    private void moveUp(){
-        snakeHead.y --;
-    }
-    private  void moveDown(){
-        snakeHead.y ++;
-    }
 
 
 
