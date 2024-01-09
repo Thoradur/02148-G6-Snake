@@ -42,6 +42,7 @@ public class Snake implements GameObject {
         step++;
         snake.addFirst(getHead().add(this.direction));
         snake.removeLast();
+
         return new Fragment(step, getDehydratedSnake().toArray(new Point[0]), true);
     }
 
@@ -82,24 +83,40 @@ public class Snake implements GameObject {
 
     public List<Point> getDehydratedSnake() {
         List<Point> dehydratedSnake = new ArrayList<>();
-        Direction direction = this.direction;
 
-        dehydratedSnake.add(getHead());
+        Direction direction = null;
 
-        for (var point : snake) {
-            var prevPoint = dehydratedSnake.getLast();
-            var newDirection = Direction.fromPoints(prevPoint, point);
+        for (var i = 0; i < snake.size(); i++) {
+            var point = snake.get(i);
 
-            if (newDirection != direction) {
+            if (dehydratedSnake.isEmpty()) {
                 dehydratedSnake.add(point);
-                direction = newDirection;
                 continue;
             }
 
-            if (getTail().equals(point)) {
-                dehydratedSnake.add(point);
+            var prevPoint = snake.get(i - 1);
+            var nextDirection = Direction.fromPoints(prevPoint, point);
+
+            if (direction == null) {
+                direction = nextDirection;
+                continue;
+            }
+
+            if (direction != nextDirection) {
+                dehydratedSnake.add(prevPoint);
+                direction = nextDirection;
             }
         }
+
+        // Add all tail points
+        var tailPoint = getTail();
+
+        // Count tail points in self by iterating backwards and stopping at the first non-tail point (use stream)
+        var tailPoints = (int) IntStream.range(0, snake.size()).mapToObj(i -> snake.get(snake.size() - i - 1)).takeWhile(tailPoint::equals).count();
+        var tailPointsOther = (int) IntStream.range(0, dehydratedSnake.size()).mapToObj(i -> dehydratedSnake.get(dehydratedSnake.size() - i - 1)).takeWhile(tailPoint::equals).count();
+
+        // Add missing tail points
+        IntStream.range(0, tailPoints - tailPointsOther).forEach(i -> dehydratedSnake.add(tailPoint));
 
         return dehydratedSnake;
     }
@@ -140,8 +157,6 @@ public class Snake implements GameObject {
 
     @Override
     public void build(Board board) {
-
-
         for (var point : snake) {
             var cell = board.getCell(point);
 
@@ -154,11 +169,9 @@ public class Snake implements GameObject {
         StringBuilder stringSnake = new StringBuilder();
 
         for (var point : this.snake) {
-            stringSnake.append(point.toString());
+            if (!point.equals(this.getHead())) stringSnake.append(" -> ");
 
-            if (point == this.snake.getLast()) continue;
-
-            stringSnake.append(" -> ");
+            stringSnake.append(point);
         }
 
         stringSnake.append('\n');
