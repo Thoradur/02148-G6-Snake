@@ -10,13 +10,17 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import snake.common.Direction;
 import snake.common.Point;
+import snake.coordination.CoordinationLobby;
+import snake.coordination.CoordinationServer;
 import snake.node.OpponentNode;
 import snake.node.Player;
 import snake.state.Board;
 import snake.state.Snake;
 import snake.state.State;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 
 /**
@@ -31,11 +35,33 @@ public class App extends Application {
 
         var label = new Label("Hello, JavaFX " + javafxVersion + ", running on Java " + javaVersion + ".");
         var startButton = new Button("Start");
+        var serverButton = new Button("Server");
 
         //Text box
         TextArea myPort = new TextArea();
         TextArea theirPort = new TextArea();
 
+        serverButton.setOnAction(e -> {
+            System.out.println("Server button pressed");
+
+            var gameServer = new CoordinationServer();
+
+            // Set the URI of the lobby of the game server
+            String uri = "tcp://127.0.0.8:9001/lobby?keep";
+
+            CoordinationLobby gameLobby = null;
+            try {
+                gameLobby = new CoordinationLobby(uri);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            //PROBLEMS: only the very first instance of a server
+            //with this uri will display text messages.
+            new Thread(gameServer).start();
+            new Thread(gameLobby).start();
+
+        });
 
         startButton.setOnAction(e -> {
             System.out.println("Start button pressed");
@@ -73,11 +99,14 @@ public class App extends Application {
             new SnakeGame(state, board, me).start(new Stage());
         });
 
+
+
         GridPane root = new GridPane();
         root.setAlignment(Pos.CENTER);
         root.setHgap(10);
         root.add(label, 0, 0);
         root.add(startButton, 0, 2);
+        root.add(serverButton, 1, 2);
         root.add(myPort, 0, 1);
         root.add(theirPort, 1, 1);
 
