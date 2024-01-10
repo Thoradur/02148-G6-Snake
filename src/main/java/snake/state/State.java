@@ -10,8 +10,18 @@ public class State {
     private final List<GameObject> gameObjects = new ArrayList<>();
     private final Stack<Layer> layers = new Stack<>();
 
+    private Board board = null;
+
     public List<GameObject> getGameObjects() {
         return gameObjects;
+    }
+
+    public Board getBoard() {
+        return board;
+    }
+
+    public void setBoard(Board board) {
+        this.board = board;
     }
 
     public void apply(Fragment fragment) {

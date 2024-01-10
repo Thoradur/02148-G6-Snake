@@ -112,9 +112,6 @@ public class SnakeGame {
                 drawSnake(gc, s);
             }
         });
-
-        // Updates the snake and board
-        board.build();
     }
 
     public void drawBackground(GraphicsContext gc) {

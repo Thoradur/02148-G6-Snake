@@ -45,18 +45,20 @@ public class OpponentNode implements Runnable {
 
         while (true) {
             try {
+                System.out.println("before receiving state update");
                 var stateUpdate = (Fragment) MessageRegistry.fromTuple(space.get(template));
 
                 System.out.println("Received state update: " + stateUpdate);
 
                 for (var gameObject : state.getGameObjects()) {
                     if (gameObject instanceof Snake s && s == this.snake) {
+
                         s.setDehydratedSnake(Arrays.asList(stateUpdate.compactSnake()));
                     }
                 }
 
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println("Got error of type: " + e.getMessage());
             }
         }
     }

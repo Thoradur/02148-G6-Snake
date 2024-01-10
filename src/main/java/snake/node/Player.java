@@ -25,22 +25,23 @@ public class Player implements Runnable {
 
     @Override
     public void run() {
-        repository.addGate(uri);
         System.out.println("Listening on " + uri);
 
         var opponentSpace = new SequentialSpace();
 
-        repository.add("opponent", opponentSpace);
+        repository.add("opponent" + uri.getPort(), opponentSpace);
+        repository.addGate(uri);
 
         while (true) {
             state.getGameObjects().forEach(gameObject -> {
                 var fragment = gameObject.step();
                 try {
+                    Thread.sleep(250);
                     new MessageSpaceProxy(opponentSpace).put(fragment);
                     System.out.println("Sent fragment: " + fragment);
-                    Thread.sleep(1000);
+                    state.getBoard().build();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
             });
 

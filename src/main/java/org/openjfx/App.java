@@ -45,6 +45,7 @@ public class App extends Application {
 
             State state = new State();
             Board board = new Board(600 / 25, 600 / 25, state);
+            ;
 
             Snake me = new Snake(new Point(0, 0), Direction.DOWN);
             Snake them = new Snake(new Point(10, 10), Direction.RIGHT);
@@ -53,7 +54,7 @@ public class App extends Application {
             state.getGameObjects().add(them);
 
             var myUri = URI.create("tcp://localhost:" + myPort.getText().strip() + "/?keep");
-            var theirUri = URI.create("tcp://localhost:" + theirPort.getText().strip() + "/opponent?keep");
+            var theirUri = URI.create("tcp://localhost:" + theirPort.getText().strip() + "/opponent" + theirPort.getText().strip() + "?keep");
 
             var self = new Player(myUri, state, me);
 
@@ -70,8 +71,6 @@ public class App extends Application {
 
             // Start UI.
             new SnakeGame(state, board, me).start(new Stage());
-
-            //            new SnakeGame(null, null, null).start(new Stage());
         });
 
         GridPane root = new GridPane();
