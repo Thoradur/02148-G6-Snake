@@ -41,7 +41,7 @@ public class App extends Application {
         TextArea myPort = new TextArea();
         TextArea theirPort = new TextArea();
 
-        serverButton.setOnAction(e -> {
+        /*serverButton.setOnAction(e -> {
             System.out.println("Server button pressed");
 
             var gameServer = new CoordinationServer();
@@ -61,7 +61,7 @@ public class App extends Application {
             new Thread(gameServer).start();
             new Thread(gameLobby).start();
 
-        });
+        });*/
 
         startButton.setOnAction(e -> {
             System.out.println("Start button pressed");
@@ -98,7 +98,6 @@ public class App extends Application {
             // Start UI.
             new SnakeGame(state, board, me).start(new Stage());
         });
-
 
 
         GridPane root = new GridPane();

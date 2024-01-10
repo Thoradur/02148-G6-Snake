@@ -2,7 +2,7 @@ package snake.node;
 
 import org.jspace.RemoteSpace;
 import snake.protocol.MessageRegistry;
-import snake.protocol.MessageSpaceProxy;
+import snake.protocol.MessageSpace;
 import snake.protocol.state.Fragment;
 import snake.state.Snake;
 import snake.state.State;
@@ -40,7 +40,7 @@ public class OpponentNode implements Runnable {
             throw new RuntimeException(e);
         }
 
-        var proxy = new MessageSpaceProxy(this.space);
+        var proxy = new MessageSpace(this.space);
         var template = MessageRegistry.getMessageFactory(Fragment.class).toTemplate();
 
         while (true) {

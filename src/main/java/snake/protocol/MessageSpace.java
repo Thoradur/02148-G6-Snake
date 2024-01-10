@@ -6,10 +6,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 
-public class MessageSpaceProxy implements MessageSpaceInterface {
+public class MessageSpace implements MessageSpaceInterface {
     private final Space wrappedSpace;
 
-    public MessageSpaceProxy(Space wrappedSpace) {
+    public MessageSpace(Space wrappedSpace) {
         this.wrappedSpace = wrappedSpace;
     }
 

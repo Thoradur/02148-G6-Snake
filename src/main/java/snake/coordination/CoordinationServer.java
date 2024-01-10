@@ -1,221 +1,88 @@
 package snake.coordination;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+
 import org.jspace.*;
+import snake.protocol.MessageRegistry;
+import snake.protocol.MessageSpace;
+import snake.protocol.coordination.CreateLobby;
+import snake.protocol.coordination.ListLobbies;
+import snake.protocol.coordination.LobbyList;
 
-public class CoordinationServer implements Runnable{
+public class CoordinationServer implements Runnable {
+    private final URI coordinationServerUri;
+    private final SpaceRepository repository = new SpaceRepository();
 
-    private SpaceRepository repository;
-    private SequentialSpace lobby;
+    // Create a local space for the game lobby
+    private final SequentialSpace waitingRoom = new SequentialSpace();
+
+    private HashMap<String, CoordinationLobby> lobbies = new HashMap<>();
+
+    public static void main(String[] args) throws URISyntaxException {
+        var s = new CoordinationServer(new URI("tcp://localhost:8111/?keep"));
+        s.run();
+    }
+
+    public CoordinationServer(URI coordinationServerUri) {
+        this.coordinationServerUri = coordinationServerUri;
+    }
+
+    public void addLobby(String lobbyId, CoordinationLobby lobby) {
+        this.repository.add(lobbyId, lobby.getSpace());
+        this.lobbies.put(lobbyId, lobby);
+    }
+
+    public void removeLobby(String lobbyId) {
+        var lobby = this.lobbies.get(lobbyId);
+
+        if (lobby == null) return;
+
+        this.repository.remove(lobbyId);
+        this.lobbies.remove(lobbyId);
+    }
+
     public void run() {
         try {
-
-            // Create a repository
-            this.repository = new SpaceRepository();
-
-            // Create a local space for the game lobby
-            this.lobby = new SequentialSpace();
-
+            var wrappedWaitingRoom = new MessageSpace(waitingRoom);
             // Add the space to the repository
-            repository.add("lobby",lobby);
+            repository.add("waiting", waitingRoom);
 
             // Set the URI of the game space
-            String uri = "tcp://127.0.0.8:9001/lobby?keep";
+            System.out.println("Listening on: " + this.coordinationServerUri);
+            repository.addGate(this.coordinationServerUri);
 
-            // Open a gate
-            repository.addGate("tcp://127.0.0.8:9001/?keep");
-            System.out.println("Opening repository gate at " + uri + "...");
-
-            // This space is where we have the game rooms
-            SequentialSpace rooms = new SequentialSpace();
+            var messageTemplate = MessageRegistry.getTemplateUnion(ListLobbies.class, CreateLobby.class);
 
             // Keep serving requests to enter game rooms
             while (true) {
+                var nextMessage = MessageRegistry.fromTuple(waitingRoom.get(messageTemplate));
+                
 
-                // roomN will be used to ensure every chat space has a unique name
-                Integer roomC = 0;
-
-                String roomURI;
-
-                while (true) {
-                    // Read request
-                    Object[] request = lobby.get(new ActualField("enter"),new FormalField(String.class), new FormalField(String.class));
-                    String who = (String) request[1];
-                    String roomID = (String) request[2];
-                    System.out.println(who + " requesting to enter " + roomID + "...");
-
-                    // If room exists just prepare the response with the corresponding URI
-                    Object[] the_room = rooms.queryp(new ActualField(roomID),new FormalField(Integer.class));
-                    if (the_room != null) {
-                        roomURI = "tcp://127.0.0.8:9001/lobby" + the_room[1] + "?keep";
-                    }
-                    // If the room does not exist, create the room and launch a room handler
-                    else {
-                        System.out.println("Creating room " + roomID + " for " + who + " ...");
-                        roomURI = "tcp://127.0.0.8:9001/lobby" + roomC + "?keep";
-                        System.out.println("Setting up game lobby space " + roomURI + "...");
-                        new Thread(new roomHandler(roomID,"lobby"+roomC,roomURI,repository)).start();
-                        rooms.put(roomID,roomC);
-                        roomC++;
-                    }
-
-                    // Sending response back to the game client
-                    System.out.println("Telling " + who + " to go for room " + roomID + " at " + roomURI + "...");
-                    lobby.put("roomURI", who, roomID, roomURI);
+                if (nextMessage instanceof CreateLobby createLobby) {
+                    // Create new lobby
+                    new Thread(new CoordinationLobby(this)).start();
                 }
 
+                if (nextMessage instanceof ListLobbies listLobbies) {
+                    System.out.println("Listing lobbies");
 
-            }
+                    List<String> lobbyURIs = new ArrayList<>();
 
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-}
-
-class roomHandler implements Runnable {
-
-    private Space game;
-    private String roomID;
-    private String spaceID;
-
-    public roomHandler(String roomID, String spaceID, String uri, SpaceRepository repository) {
-
-        this.roomID = roomID;
-        this.spaceID = spaceID;
-
-        // Create a local space for the chatroom
-        game = new SequentialSpace();
-
-        // Add the space to the repository
-        repository.add(this.spaceID, game);
-
-    }
-
-    @Override
-    public void run() {
-        try {
-
-            // Printing messages written in the lobby to see the connection
-            while (true) {
-                Object[] message = game.get(new FormalField(String.class), new FormalField(String.class));
-                System.out.println("ROOM " + roomID + " | " + message[0] + ":" + message[1]);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-
-    }
-}
-
-/*
-import java.util.HashMap;
-import java.util.Map;
-import org.jspace.*;
-
-public class CoordinationServer {
-
-    public static void main(String[] args) {
-        try {
-
-            // Create a repository
-            SpaceRepository repository = new SpaceRepository();
-
-            // Create a local space for the chat messages
-            SequentialSpace lobby = new SequentialSpace();
-
-            // Add the space to the repository
-            repository.add("lobby",lobby);
-
-            // Set the URI of the game space
-            String uri = "tcp://127.0.0.1:9001/lobby?keep";
-
-            // Open a gate
-            repository.addGate("tcp://127.0.0.1:9001/?keep");
-            System.out.println("Opening repository gate at " + uri + "...");
-
-            // This space is where we have the game rooms
-            SequentialSpace rooms = new SequentialSpace();
-
-            // Keep serving requests to enter game rooms
-            while (true) {
-
-                // roomN will be used to ensure every chat space has a unique name
-                Integer roomC = 0;
-
-                String roomURI;
-
-                while (true) {
-                    // Read request
-                    Object[] request = lobby.get(new ActualField("enter"),new FormalField(String.class), new FormalField(String.class));
-                    String who = (String) request[1];
-                    String roomID = (String) request[2];
-                    System.out.println(who + " requesting to enter " + roomID + "...");
-
-                    // If room exists just prepare the response with the corresponding URI
-                    Object[] the_room = rooms.queryp(new ActualField(roomID),new FormalField(Integer.class));
-                    if (the_room != null) {
-                        roomURI = "tcp://127.0.0.1:9001/chat" + the_room[1] + "?keep";
-                    }
-                    // If the room does not exist, create the room and launch a room handler
-                    else {
-                        System.out.println("Creating room " + roomID + " for " + who + " ...");
-                        roomURI = "tcp://127.0.0.1:9001/chat" + roomC + "?keep";
-                        System.out.println("Setting up chat space " + roomURI + "...");
-                        new Thread(new roomHandler(roomID,"chat"+roomC,roomURI,repository)).start();
-                        rooms.put(roomID,roomC);
-                        roomC++;
+                    for (var lobby : this.lobbies.values()) {
+                        lobbyURIs.add(String.valueOf(new URI("tcp://" + this.coordinationServerUri.getHost() + ":" + this.coordinationServerUri.getPort() + "/" + lobby.getLobbyId() + "?keep")));
                     }
 
-                    // Sending response back to the game client
-                    System.out.println("Telling " + who + " to go for room " + roomID + " at " + roomURI + "...");
-                    lobby.put("roomURI", who, roomID, roomURI);
+                    wrappedWaitingRoom.put(new LobbyList(lobbyURIs.toArray(new String[0])));
                 }
-
-
             }
 
-        } catch (InterruptedException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 }
-
-class roomHandler implements Runnable {
-
-    private Space game;
-    private String roomID;
-    private String spaceID;
-
-    public roomHandler(String roomID, String spaceID, String uri, SpaceRepository repository) {
-
-        this.roomID = roomID;
-        this.spaceID = spaceID;
-
-        // Create a local space for the chatroom
-        game = new SequentialSpace();
-
-        // Add the space to the repository
-        repository.add(this.spaceID, game);
-
-    }
-
-    @Override
-    public void run() {
-        try {
-
-            // Printing messages written in the lobby to see the connection
-            while (true) {
-                Object[] message = game.get(new FormalField(String.class), new FormalField(String.class));
-                System.out.println("ROOM " + roomID + " | " + message[0] + ":" + message[1]);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-
-    }
-}
-*/

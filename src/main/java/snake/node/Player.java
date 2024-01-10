@@ -2,7 +2,7 @@ package snake.node;
 
 import org.jspace.SequentialSpace;
 import org.jspace.SpaceRepository;
-import snake.protocol.MessageSpaceProxy;
+import snake.protocol.MessageSpace;
 import snake.state.Snake;
 import snake.state.State;
 
@@ -37,7 +37,7 @@ public class Player implements Runnable {
                 var fragment = gameObject.step();
                 try {
                     Thread.sleep(250);
-                    new MessageSpaceProxy(opponentSpace).put(fragment);
+                    new MessageSpace(opponentSpace).put(fragment);
                     System.out.println("Sent fragment: " + fragment);
                     state.getBoard().build();
                 } catch (Exception e) {
