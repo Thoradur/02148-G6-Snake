@@ -16,7 +16,6 @@ public class CoordinationLobby implements Runnable {
         this.board = new Board(width, height, state);
     }
 
-
     //to check if all players are ready
     public synchronized void playerReady() {
         if (readyPlayers.incrementAndGet() == totalPlayers) {
