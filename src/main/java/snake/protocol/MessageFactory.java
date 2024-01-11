@@ -131,6 +131,10 @@ public class MessageFactory<T extends Record> {
 
         System.arraycopy(tuple, 1, args, 0, recordComponents.length);
 
-        return (T) constructor.newInstance(args);
+        var t = (T) constructor.newInstance(args);
+
+        System.out.println("Got: " + t);
+
+        return t;
     }
 }

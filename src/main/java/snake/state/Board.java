@@ -19,6 +19,7 @@ public class Board {
         this.width = width;
         this.height = height;
         this.state = state;
+        state.setBoard(this);
         cells = new Cell[width][height];
 
         for (int x = 0; x < width; x++) {

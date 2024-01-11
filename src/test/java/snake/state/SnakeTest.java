@@ -11,22 +11,21 @@ import java.util.Random;
 
 public class SnakeTest {
 
-    @RepeatedTest(10)
+    @RepeatedTest(100)
     public void testSnakeDehydration() {
-        int steps = 10;
+        int steps = 40;
 
         Random random = new Random();
 
-        Snake s1 = new Snake(new Point(random.nextInt(10), random.nextInt(10)), Direction.random(random));
+        Snake s1 = new Snake(Point.random(random), Direction.random(random));
 
         for (int i = 0; i < steps; i++) {
             s1.grow(random.nextInt(3));
+            s1.step();
             s1.setDirection(Direction.random(random));
         }
 
         var dehydratedSnake = s1.getDehydratedSnake();
-
-        System.out.println(dehydratedSnake);
 
         Snake s2 = new Snake(dehydratedSnake);
 
