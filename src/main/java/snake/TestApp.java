@@ -1,12 +1,8 @@
 package snake;
 
-import javafx.stage.Stage;
-import org.openjfx.SnakeGame;
 import snake.common.Direction;
 import snake.common.Point;
 import snake.protocol.Message;
-import snake.protocol.MessageFactory;
-import snake.protocol.MessageRegistry;
 import snake.state.Board;
 import snake.state.GameObject;
 import snake.state.Snake;

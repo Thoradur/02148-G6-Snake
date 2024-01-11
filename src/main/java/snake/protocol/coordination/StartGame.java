@@ -2,6 +2,8 @@ package snake.protocol.coordination;
 
 import snake.protocol.Message;
 
-@Message(name = "start_game", compact = true)
-public record StartGame(String playerId, String[] players) {
+import java.net.URI;
+
+@Message(name = "start_game", compact = false)
+public record StartGame(String playerId, URI[] players) {
 }

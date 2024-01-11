@@ -11,6 +11,7 @@ import snake.protocol.MessageRegistry;
 import snake.protocol.MessageSpace;
 import snake.protocol.coordination.CreateLobby;
 import snake.protocol.coordination.ListLobbies;
+import snake.protocol.coordination.LobbyCreated;
 import snake.protocol.coordination.LobbyList;
 
 public class CoordinationServer implements Runnable {
@@ -29,6 +30,10 @@ public class CoordinationServer implements Runnable {
 
     public CoordinationServer(URI coordinationServerUri) {
         this.coordinationServerUri = coordinationServerUri;
+    }
+
+    public MessageSpace getWaitingRoom() {
+        return new MessageSpace(waitingRoom);
     }
 
     public void addLobby(String lobbyId, CoordinationLobby lobby) {
@@ -60,23 +65,18 @@ public class CoordinationServer implements Runnable {
             // Keep serving requests to enter game rooms
             while (true) {
                 var nextMessage = MessageRegistry.fromTuple(waitingRoom.get(messageTemplate));
-                
 
                 if (nextMessage instanceof CreateLobby createLobby) {
                     // Create new lobby
-                    new Thread(new CoordinationLobby(this)).start();
+                    var lobby = new CoordinationLobby(this);
+                    new Thread(lobby).start();
+                    wrappedWaitingRoom.put(new LobbyCreated(createLobby.playerId(), lobby.getLobbyId()));
                 }
 
                 if (nextMessage instanceof ListLobbies listLobbies) {
                     System.out.println("Listing lobbies");
-
-                    List<String> lobbyURIs = new ArrayList<>();
-
-                    for (var lobby : this.lobbies.values()) {
-                        lobbyURIs.add(String.valueOf(new URI("tcp://" + this.coordinationServerUri.getHost() + ":" + this.coordinationServerUri.getPort() + "/" + lobby.getLobbyId() + "?keep")));
-                    }
-
-                    wrappedWaitingRoom.put(new LobbyList(lobbyURIs.toArray(new String[0])));
+                    var lobbyIds = lobbies.values().stream().map(CoordinationLobby::getLobbyId).toList().toArray(new String[0]);
+                    wrappedWaitingRoom.put(new LobbyList(lobbyIds));
                 }
             }
 

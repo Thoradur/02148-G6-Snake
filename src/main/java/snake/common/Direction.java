@@ -25,6 +25,10 @@ public enum Direction {
         return new Point(dx, dy);
     }
 
+    public boolean isOpposite(Direction other) {
+        return dx == -other.dx && dy == -other.dy;
+    }
+
     public static Direction fromPoints(Point p1, Point p2) {
         if (p1.x() != p2.x()) {
             return p1.x() < p2.x() ? RIGHT : LEFT;

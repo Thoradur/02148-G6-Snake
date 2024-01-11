@@ -50,9 +50,10 @@ public class CoordinationClient {
         return (StartGame) wrappedSpace.get(new StartGame(playerId, null));
     }
 
-    public void createLobby() throws InterruptedException, InvocationTargetException, IllegalAccessException {
+    public LobbyCreated createLobby() throws InterruptedException, InvocationTargetException, IllegalAccessException, InstantiationException {
         var wrappedSpace = new MessageSpace(coordinationWaitingRoom);
-        wrappedSpace.put(new CreateLobby());
+        wrappedSpace.put(new CreateLobby(playerId));
+        return (LobbyCreated) wrappedSpace.get(new LobbyCreated(playerId, null));
     }
 
     public LobbyList listLobbies() throws InterruptedException, InvocationTargetException, IllegalAccessException, InstantiationException {
@@ -61,7 +62,6 @@ public class CoordinationClient {
         return (LobbyList) wrappedSpace.get(new LobbyList(null));
     }
 
-
     public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException, InvocationTargetException, IllegalAccessException, InstantiationException {
         var playerId = UUID.randomUUID().toString();
         var port = new Random().nextInt(65535);
@@ -69,14 +69,25 @@ public class CoordinationClient {
 
         var c = new CoordinationClient(playerId, playerBaseUri, new URI("tcp://localhost:8111/waiting?keep"));
 
-        c.createLobby();
+        String lobbyId;
+
 
         var lobbies = c.listLobbies().lobbies();
-        var lobbyURI = Arrays.stream(lobbies).toList().getLast();
 
-        System.out.println("Connecting to lobby: " + lobbyURI);
+        System.out.println(Arrays.toString(lobbies));
 
-        c.coordinationLobby = new RemoteSpace(lobbyURI);
+        if (lobbies.length > 0) {
+            lobbyId = lobbies[0];
+        } else {
+            lobbyId = c.createLobby().lobbyId();
+        }
+
+
+        URI lobbyUri = new URI("tcp://localhost:8111/" + lobbyId + "?keep");
+
+        System.out.println("Connecting to lobby: " + lobbyUri);
+
+        c.coordinationLobby = new RemoteSpace(lobbyUri);
 
         c.sendPlayerInfo();
         c.ready();

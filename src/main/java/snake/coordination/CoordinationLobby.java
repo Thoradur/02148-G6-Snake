@@ -9,6 +9,9 @@ import snake.protocol.coordination.PlayerInfo;
 import snake.protocol.coordination.Ready;
 import snake.protocol.coordination.StartGame;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -81,12 +84,23 @@ public class CoordinationLobby implements Runnable {
                 if (players.size() >= 2) break;
             }
 
-            // Send start game
-            for (var playerId : players.keySet()) {
-                wrappedSpace.put(new StartGame(playerId, new String[0]));
+            List<URI> playerURIs = new ArrayList<>();
+
+            for (var playerConnection : players.values()) {
+                playerURIs.add(playerConnection.info.baseUri());
             }
 
-            this.server.removeLobby(this.lobbyId);
+            // Send start game
+            for (var playerId : players.keySet()) {
+                var playerUri = players.get(playerId).info.baseUri();
+
+                // filter
+                var filteredPlayerURIs = playerURIs.stream().filter(uri -> !uri.equals(playerUri)).toArray(URI[]::new);
+
+                wrappedSpace.put(new StartGame(playerId, filteredPlayerURIs));
+            }
+
+            // this.server.removeLobby(this.lobbyId);
         } catch (Exception e) {
             e.printStackTrace();
         }
