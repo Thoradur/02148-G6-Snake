@@ -35,6 +35,7 @@ public class Player implements Runnable {
         while (true) {
             state.getGameObjects().forEach(gameObject -> {
                 var fragment = gameObject.step();
+
                 try {
                     Thread.sleep(250);
                     new MessageSpace(opponentSpace).put(fragment);

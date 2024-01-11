@@ -4,10 +4,7 @@ import org.jspace.SequentialSpace;
 import org.jspace.Space;
 import snake.protocol.MessageRegistry;
 import snake.protocol.MessageSpace;
-import snake.protocol.coordination.LeaveLobby;
-import snake.protocol.coordination.PlayerInfo;
-import snake.protocol.coordination.Ready;
-import snake.protocol.coordination.StartGame;
+import snake.protocol.coordination.*;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -84,20 +81,55 @@ public class CoordinationLobby implements Runnable {
                 if (players.size() >= 2) break;
             }
 
-            List<URI> playerURIs = new ArrayList<>();
 
-            for (var playerConnection : players.values()) {
-                playerURIs.add(playerConnection.info.baseUri());
+            /* HashMap of every player id and their map of opponent secrets
+
+                Given players P1, P2
+
+                {
+                    P1: {
+                        P2: "a"
+                    },
+                    P2: {
+                        P1: "b"
+                    }
+                }
+
+                Here P1 listens on "a" and P2 listens on "b"
+                Then P1 connects to P2 on "b" and P2 connects to P1 on "a"
+
+             */
+            HashMap<String, HashMap<String, String>> playerSecretMap = new HashMap<>();
+
+
+            for (var playerId : players.keySet()) {
+                for (var opponentId : players.keySet()) {
+                    if (playerId.equals(opponentId)) continue;
+
+                    var playerToOpponentSecret = UUID.randomUUID().toString();
+
+                    if (!playerSecretMap.containsKey(playerId)) {
+                        playerSecretMap.put(playerId, new HashMap<>());
+                    }
+
+                    playerSecretMap.get(playerId).put(opponentId, playerToOpponentSecret);
+                }
             }
 
             // Send start game
             for (var playerId : players.keySet()) {
-                var playerUri = players.get(playerId).info.baseUri();
+                ArrayList<OpponentInfo> opponentInfos = new ArrayList<>();
 
-                // filter
-                var filteredPlayerURIs = playerURIs.stream().filter(uri -> !uri.equals(playerUri)).toArray(URI[]::new);
+                for (var opponentId : players.keySet()) {
+                    if (playerId.equals(opponentId)) continue;
 
-                wrappedSpace.put(new StartGame(playerId, filteredPlayerURIs));
+                    var playerInfo = players.get(opponentId).info;
+                    var opponentInfo = new OpponentInfo(playerInfo.baseUri(), playerSecretMap.get(playerId).get(opponentId), playerSecretMap.get(opponentId).get(playerId));
+
+                    opponentInfos.add(opponentInfo);
+                }
+
+                wrappedSpace.put(new StartGame(playerId, opponentInfos.toArray(new OpponentInfo[0])));
             }
 
             // this.server.removeLobby(this.lobbyId);

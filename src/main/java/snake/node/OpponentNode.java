@@ -3,6 +3,7 @@ package snake.node;
 import org.jspace.RemoteSpace;
 import snake.protocol.MessageRegistry;
 import snake.protocol.MessageSpace;
+import snake.protocol.coordination.OpponentInfo;
 import snake.protocol.state.Fragment;
 import snake.state.Snake;
 import snake.state.State;
@@ -12,13 +13,13 @@ import java.net.URI;
 import java.util.Arrays;
 
 public class OpponentNode implements Runnable {
-    private URI uri;
+    private OpponentInfo info;
     private RemoteSpace space;
     private Snake snake;
     private State state;
 
-    public OpponentNode(URI uri, State state, Snake snake) throws IOException {
-        this.uri = uri;
+    public OpponentNode(OpponentInfo info, State state, Snake snake) throws IOException {
+        this.info = info;
         this.state = state;
         this.snake = snake;
     }
