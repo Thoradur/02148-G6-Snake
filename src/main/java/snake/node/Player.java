@@ -26,7 +26,7 @@ public class Player implements Runnable {
 
     public Player(URI uri, StartGame startGame) {
         this.uri = uri;
-        this.state = new State();
+        this.state = new State(startGame.seed());
         this.board = new Board(startGame.width(), startGame.height(), this.state);
         this.snake = new Snake(List.of(startGame.startSnake()));
 

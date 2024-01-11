@@ -2,15 +2,15 @@ package snake.coordination;
 
 import org.jspace.SequentialSpace;
 import org.jspace.Space;
+import snake.common.Direction;
+import snake.common.Point;
 import snake.protocol.MessageRegistry;
 import snake.protocol.MessageSpace;
 import snake.protocol.coordination.*;
+import snake.state.Snake;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 public class CoordinationLobby implements Runnable {
     private static class PlayerConnection {
@@ -81,6 +81,19 @@ public class CoordinationLobby implements Runnable {
                 if (players.size() >= 2) break;
             }
 
+            HashMap<String, Point[]> initialSnakes = new HashMap<>();
+            Random r = new Random();
+
+            int seed = r.nextInt();
+            int width = 50;
+            int height = 50;
+
+
+            for (var playerId : players.keySet()) {
+                var snake = new Snake(Point.random(r, width, height), Direction.random(r));
+
+                initialSnakes.put(playerId, snake.getDehydratedSnake().toArray(new Point[0]));
+            }
 
             /* HashMap of every player id and their map of opponent secrets
 
@@ -99,6 +112,7 @@ public class CoordinationLobby implements Runnable {
                 Then P1 connects to P2 on "b" and P2 connects to P1 on "a"
 
              */
+
             HashMap<String, HashMap<String, String>> playerSecretMap = new HashMap<>();
 
 
@@ -124,12 +138,26 @@ public class CoordinationLobby implements Runnable {
                     if (playerId.equals(opponentId)) continue;
 
                     var playerInfo = players.get(opponentId).info;
-                    var opponentInfo = new OpponentInfo(playerInfo.baseUri(), playerSecretMap.get(playerId).get(opponentId), playerSecretMap.get(opponentId).get(playerId));
+                    var opponentInfo = new OpponentInfo(
+                            playerInfo.baseUri(),
+                            initialSnakes.get(opponentId),
+                            playerSecretMap.get(playerId).get(opponentId),
+                            playerSecretMap.get(opponentId).get(playerId)
+                    );
 
                     opponentInfos.add(opponentInfo);
                 }
 
-                wrappedSpace.put(new StartGame(playerId, opponentInfos.toArray(new OpponentInfo[0])));
+                wrappedSpace.put(
+                        new StartGame(
+                                playerId,
+                                width,
+                                height,
+                                seed,
+                                initialSnakes.get(playerId),
+                                opponentInfos.toArray(new OpponentInfo[0])
+                        )
+                );
             }
 
             // this.server.removeLobby(this.lobbyId);

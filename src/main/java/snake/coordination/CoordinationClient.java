@@ -47,7 +47,7 @@ public class CoordinationClient {
 
     public StartGame waitForStart() throws InterruptedException, InvocationTargetException, IllegalAccessException, InstantiationException {
         var wrappedSpace = new MessageSpace(coordinationLobby);
-        return (StartGame) wrappedSpace.get(new StartGame(playerId, null));
+        return (StartGame) wrappedSpace.get(new StartGame(playerId, null, null, null, null, null));
     }
 
     public LobbyCreated createLobby() throws InterruptedException, InvocationTargetException, IllegalAccessException, InstantiationException {
@@ -94,6 +94,6 @@ public class CoordinationClient {
 
         var startGame = c.waitForStart();
 
-        System.out.println(Arrays.toString(startGame.players()));
+        System.out.println(Arrays.toString(startGame.opponents()));
     }
 }
