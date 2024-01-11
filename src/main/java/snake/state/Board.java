@@ -45,6 +45,13 @@ public class Board {
         for (var gameObject : state.getGameObjects()) {
             gameObject.build(this);
         }
+
+        for(var gameObject : state.getGameObjects()){
+            if (gameObject instanceof Snake s) {
+                s.collision(this);;
+            }
+
+        }
     }
 
     public Stream<Cell> stream() {
@@ -52,13 +59,11 @@ public class Board {
     }
 
     public Cell getCell(Point point) {
-        // If cell is out of bounds, wrap it around
-        if (point.x() < 0) point = new Point(width + point.x(), point.y());
-        if (point.y() < 0) point = new Point(point.x(), height + point.y());
-        if (point.x() >= width) point = new Point(point.x() - width, point.y());
-        if (point.y() >= height) point = new Point(point.x(), point.y() - height);
-
-        return cells[point.x()][point.y()];
+        try {
+            return cells[point.x()][point.y()];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return null;
+        }
     }
 
     public String toString() {

@@ -23,7 +23,7 @@ public class Fruit implements GameObject {
 
     @Override
     public void build(Board board) {
-
+        board.getCell(position).getStack().push(this);
         
     }
 
@@ -42,13 +42,11 @@ public class Fruit implements GameObject {
 
     @Override
     public int getStep() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getStep'");
+        return 0;
     }
 
     @Override
     public Fragment step() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'step'");
+        return null;
     }
 }

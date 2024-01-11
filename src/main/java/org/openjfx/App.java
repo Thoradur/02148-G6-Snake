@@ -20,6 +20,7 @@ import snake.state.Board;
 import snake.state.GameObject;
 import snake.state.Snake;
 import snake.state.State;
+import snake.state.Fruit;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,9 +41,17 @@ public class App extends Application {
 
 
         var state = new State();
-        var board = new Board(20, 20, state);
+        var board = new Board(24, 24, state);
         var snake = new Snake(new Point(10, 10), Direction.UP);
+        snake.grow(10);
         state.getGameObjects().add(snake);
+
+        var snake2 = new Snake(new Point(15, 17), Direction.UP);
+        snake2.grow(4);
+        state.getGameObjects().add(snake2);
+
+        var fruit = new Fruit(new Point(5, 5));
+        state.getGameObjects().add(fruit);
         var snakeScreen = new SnakeScene(state, snake);
         snakeScreen.setActive();
         stage.show();
@@ -50,7 +59,7 @@ public class App extends Application {
         new Thread(() -> {
             while (true) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                     board.build();
                     state.getGameObjects().forEach(GameObject::step);
                 } catch (Exception e) {
