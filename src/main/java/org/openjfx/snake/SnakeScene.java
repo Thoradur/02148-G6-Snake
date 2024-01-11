@@ -4,21 +4,20 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import org.openjfx.SceneProvider;
 import snake.common.Direction;
+import snake.node.Player;
 import snake.state.Snake;
 import snake.state.State;
 
 public class SnakeScene implements SceneProvider {
     private final Scene scene;
     private final Group root = new Group();
-    private final State state;
-    private final Snake playerSnake;
+    private final Player player;
     private final SnakeCanvas snakeCanvas;
 
-    public SnakeScene(State state, Snake playerSnake) {
+    public SnakeScene(Player player) {
+        this.player = player;
         this.scene = new Scene(root);
-        this.state = state;
-        this.playerSnake = playerSnake;
-        this.snakeCanvas = new SnakeCanvas(this.state);
+        this.snakeCanvas = new SnakeCanvas(player);
         this.snakeCanvas.setScene(scene);
         this.root.getChildren().add(snakeCanvas.getNode());
 
@@ -31,10 +30,10 @@ public class SnakeScene implements SceneProvider {
                 default -> null;
             };
 
-            System.out.println("Current direction: " + playerSnake.getDirection() + ", next direction: " + nextDirection);
+            System.out.println("Current direction: " + player.getSnake().getDirection() + ", next direction: " + nextDirection);
 
-            if (nextDirection != null && !playerSnake.getDirection().isOpposite(nextDirection)) {
-                playerSnake.setDirection(nextDirection);
+            if (nextDirection != null && !player.getSnake().getDirection().isOpposite(nextDirection)) {
+                player.getSnake().setDirection(nextDirection);
                 System.out.println("Changing direction to " + nextDirection);
             }
         });

@@ -1,5 +1,7 @@
 package snake.protocol.coordination;
 
+import snake.common.Point;
+
 import java.net.URI;
 
 /**
@@ -7,5 +9,5 @@ import java.net.URI;
  * @param opponentSecret The secret of the opponent
  * @param playerSecret   The secret of the player
  */
-public record OpponentInfo(URI baseUri, String opponentSecret, String playerSecret) {
+public record OpponentInfo(URI baseUri, Point[] startSnake, String opponentSecret, String playerSecret) {
 }

@@ -38,26 +38,9 @@ public class App extends Application {
         stage.setWidth(800);
         stage.setHeight(600);
 
-
-        var state = new State();
-        var board = new Board(20, 20, state);
-        var snake = new Snake(new Point(10, 10), Direction.UP);
-        state.getGameObjects().add(snake);
-        var snakeScreen = new SnakeScene(state, snake);
-        snakeScreen.setActive();
+       // var snakeScreen = new SnakeScene(new Player());
+       //  snakeScreen.setActive();
         stage.show();
-
-        new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(1000);
-                    board.build();
-                    state.getGameObjects().forEach(GameObject::step);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
     }
 
     public static void main(String[] args) {

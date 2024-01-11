@@ -31,6 +31,8 @@ public class OpponentNode implements Runnable {
     @Override
     public void run() {
         try {
+            var uri = new URI("tcp://" + info.baseUri().getHost() + ":" + info.baseUri().getPort() + "/" + info.opponentSecret() + "?keep");
+
             // SLeep for 5 seconds
             System.out.println("Sleeping for 5 seconds waiting for server to start");
             Thread.sleep(5000);
