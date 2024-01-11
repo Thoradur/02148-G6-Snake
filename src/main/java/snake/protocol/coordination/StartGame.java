@@ -1,5 +1,6 @@
 package snake.protocol.coordination;
 
+import snake.common.Direction;
 import snake.common.Point;
 import snake.protocol.Message;
 
@@ -11,6 +12,7 @@ public record StartGame(
         Integer width,
         Integer height,
         Integer seed,
+        Direction startDirection,
         Point[] startSnake,
         OpponentInfo[] opponents
 ) {

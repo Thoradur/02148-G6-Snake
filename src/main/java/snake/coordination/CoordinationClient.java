@@ -47,7 +47,7 @@ public class CoordinationClient {
 
     public StartGame waitForStart() throws InterruptedException, InvocationTargetException, IllegalAccessException, InstantiationException {
         var wrappedSpace = new MessageSpace(coordinationLobby);
-        return (StartGame) wrappedSpace.get(new StartGame(playerId, null, null, null, null, null));
+        return (StartGame) wrappedSpace.get(new StartGame(playerId, null, null, null, null, null, null));
     }
 
     public LobbyCreated createLobby() throws InterruptedException, InvocationTargetException, IllegalAccessException, InstantiationException {

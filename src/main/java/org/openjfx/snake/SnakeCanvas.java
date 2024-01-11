@@ -43,8 +43,8 @@ public class SnakeCanvas implements NodeProvider {
         int cellSize = getCellSize();
 
         // Draws background
-        for (int i = 0; i < canvas.getWidth() / cellSize; i++) {
-            for (int j = 0; j < canvas.getHeight() / cellSize; j++) {
+        for (int i = 0; i < board.getWidth() * cellSize; i++) {
+            for (int j = 0; j < board.getHeight() * cellSize; j++) {
                 if ((i + j) % 2 == 0) {
                     gc.setFill(Color.web("cbd1c5"));
                 } else {

@@ -29,6 +29,8 @@ public class Player implements Runnable {
         this.state = new State(startGame.seed());
         this.board = new Board(startGame.width(), startGame.height(), this.state);
         this.snake = new Snake(List.of(startGame.startSnake()));
+        this.snake.setDirection(startGame.startDirection());
+        this.state.getGameObjects().add(this.snake);
 
         for (var opponentInfo : startGame.opponents()) {
             try {
@@ -74,6 +76,9 @@ public class Player implements Runnable {
 
         repository.add("opponent" + uri.getPort(), opponentSpace);
         repository.addGate(uri);
+
+        // Start all opponents
+        opponents.forEach(Opponent::spawn);
 
         while (true) {
             try {

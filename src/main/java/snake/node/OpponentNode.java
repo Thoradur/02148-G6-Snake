@@ -34,8 +34,8 @@ public class OpponentNode implements Runnable {
             var uri = new URI("tcp://" + info.baseUri().getHost() + ":" + info.baseUri().getPort() + "/" + info.opponentSecret() + "?keep");
 
             // SLeep for 5 seconds
-            System.out.println("Sleeping for 5 seconds waiting for server to start");
-            Thread.sleep(5000);
+            System.out.println("Sleeping for 10 seconds waiting for server to start");
+            Thread.sleep(10000);
 
             System.out.println("Connecting to " + uri);
             this.space = new RemoteSpace(uri);

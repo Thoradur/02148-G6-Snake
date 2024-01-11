@@ -82,6 +82,7 @@ public class CoordinationLobby implements Runnable {
             }
 
             HashMap<String, Point[]> initialSnakes = new HashMap<>();
+            HashMap<String, Direction> initialDirections = new HashMap<>();
             Random r = new Random();
 
             int seed = r.nextInt();
@@ -91,7 +92,7 @@ public class CoordinationLobby implements Runnable {
 
             for (var playerId : players.keySet()) {
                 var snake = new Snake(Point.random(r, width, height), Direction.random(r));
-
+                initialDirections.put(playerId, snake.getDirection());
                 initialSnakes.put(playerId, snake.getDehydratedSnake().toArray(new Point[0]));
             }
 
@@ -140,6 +141,7 @@ public class CoordinationLobby implements Runnable {
                     var playerInfo = players.get(opponentId).info;
                     var opponentInfo = new OpponentInfo(
                             playerInfo.baseUri(),
+                            initialDirections.get(opponentId),
                             initialSnakes.get(opponentId),
                             playerSecretMap.get(playerId).get(opponentId),
                             playerSecretMap.get(opponentId).get(playerId)
@@ -154,6 +156,7 @@ public class CoordinationLobby implements Runnable {
                                 width,
                                 height,
                                 seed,
+                                initialDirections.get(playerId),
                                 initialSnakes.get(playerId),
                                 opponentInfos.toArray(new OpponentInfo[0])
                         )
