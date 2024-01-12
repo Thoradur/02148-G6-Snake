@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import org.openjfx.matchmaking.MatchMakingScene;
 import org.openjfx.snake.SnakeScene;
 import org.openjfx.startscreen.StartScreenScene;
 import snake.common.Direction;
@@ -24,7 +25,9 @@ import snake.state.State;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * JavaFX App
@@ -32,7 +35,7 @@ import java.net.URI;
 public class App extends Application {
 
     @Override
-    public void start(Stage stage) throws InterruptedException {
+    public void start(Stage stage) throws InterruptedException, URISyntaxException, IOException, InvocationTargetException, IllegalAccessException, InstantiationException {
         SceneManager.getInstance().setStage(stage);
 
         stage.setWidth(800);
@@ -40,6 +43,9 @@ public class App extends Application {
 
        // var snakeScreen = new SnakeScene(new Player());
        //  snakeScreen.setActive();
+
+        var matchMakingScreen = new MatchMakingScene();
+        matchMakingScreen.setActive();
         stage.show();
     }
 
