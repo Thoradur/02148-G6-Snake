@@ -11,6 +11,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import org.openjfx.NodeProvider;
+import snake.node.Player;
 import snake.state.Board;
 import snake.state.Snake;
 import snake.state.State;
@@ -23,8 +24,8 @@ public class SnakeCanvas implements NodeProvider {
     private final State state;
     private final Board board;
 
-    public SnakeCanvas(State state) {
-        this.state = state;
+    public SnakeCanvas(Player player) {
+        this.state = player.getState();
         this.board = state.getBoard();
         this.canvas = new Canvas(0, 0);
         this.timeline = new Timeline(new KeyFrame(Duration.millis(125), e -> draw()));
@@ -44,8 +45,8 @@ public class SnakeCanvas implements NodeProvider {
         int cellSize = getCellSize();
 
         // Draws background
-        for (int i = 0; i < canvas.getWidth() / cellSize; i++) {
-            for (int j = 0; j < canvas.getHeight() / cellSize; j++) {
+        for (int i = 0; i < board.getWidth() * cellSize; i++) {
+            for (int j = 0; j < board.getHeight() * cellSize; j++) {
                 if ((i + j) % 2 == 0) {
                     gc.setFill(Color.web("cbd1c5"));
                 } else {

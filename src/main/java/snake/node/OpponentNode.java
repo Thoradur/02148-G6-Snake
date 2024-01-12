@@ -3,6 +3,7 @@ package snake.node;
 import org.jspace.RemoteSpace;
 import snake.protocol.MessageRegistry;
 import snake.protocol.MessageSpace;
+import snake.protocol.coordination.OpponentInfo;
 import snake.protocol.state.Fragment;
 import snake.state.Snake;
 import snake.state.State;
@@ -12,13 +13,13 @@ import java.net.URI;
 import java.util.Arrays;
 
 public class OpponentNode implements Runnable {
-    private URI uri;
+    private OpponentInfo info;
     private RemoteSpace space;
     private Snake snake;
     private State state;
 
-    public OpponentNode(URI uri, State state, Snake snake) throws IOException {
-        this.uri = uri;
+    public OpponentNode(OpponentInfo info, State state, Snake snake) throws IOException {
+        this.info = info;
         this.state = state;
         this.snake = snake;
     }
@@ -30,9 +31,11 @@ public class OpponentNode implements Runnable {
     @Override
     public void run() {
         try {
+            var uri = new URI("tcp://" + info.baseUri().getHost() + ":" + info.baseUri().getPort() + "/" + info.opponentSecret() + "?keep");
+
             // SLeep for 5 seconds
-            System.out.println("Sleeping for 5 seconds waiting for server to start");
-            Thread.sleep(5000);
+            System.out.println("Sleeping for 10 seconds waiting for server to start");
+            Thread.sleep(10000);
 
             System.out.println("Connecting to " + uri);
             this.space = new RemoteSpace(uri);

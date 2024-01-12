@@ -16,6 +16,8 @@ import snake.coordination.CoordinationLobby;
 import snake.coordination.CoordinationServer;
 import snake.node.OpponentNode;
 import snake.node.Player;
+import snake.protocol.coordination.OpponentInfo;
+import snake.protocol.coordination.StartGame;
 import snake.state.Board;
 import snake.state.GameObject;
 import snake.state.Snake;
@@ -31,6 +33,7 @@ import java.net.URI;
  * JavaFX App
  */
 public class App extends Application {
+    private static int port;
 
     @Override
     public void start(Stage stage) throws InterruptedException {
@@ -39,37 +42,37 @@ public class App extends Application {
         stage.setWidth(800);
         stage.setHeight(600);
 
+        URI baseUri = URI.create("tcp://localhost:" + port + "/?keep");
+        Point[] startSnake1 = new Point[]{new Point(10, 10)};
+        Point[] startSnake2 = new Point[]{new Point(20, 20)};
+        Point[] startSnake;
 
-        var state = new State();
-        var board = new Board(24, 24, state);
-        var snake = new Snake(new Point(10, 10), Direction.UP);
-        snake.grow(10);
-        state.getGameObjects().add(snake);
+        OpponentInfo[] opponents = new OpponentInfo[1];
 
-        var snake2 = new Snake(new Point(15, 17), Direction.UP);
-        snake2.grow(4);
-        state.getGameObjects().add(snake2);
+        if (port == 8081) {
+            startSnake = startSnake1;
+            opponents[0] = new OpponentInfo(URI.create("tcp://localhost:8080/?keep"), Direction.DOWN, startSnake2, "secret", "secret");
 
-        var fruit = new Fruit(new Point(5, 5));
-        state.getGameObjects().add(fruit);
-        var snakeScreen = new SnakeScene(state, snake);
+        } else if (port == 8080) {
+            startSnake = startSnake2;
+            opponents[0] = new OpponentInfo(URI.create("tcp://localhost:8081/?keep"), Direction.DOWN, startSnake1, "secret", "secret");
+        } else {
+            throw new RuntimeException("Invalid port must be 8080 or 8081");
+        }
+
+
+        var startGame = new StartGame("player_id", 50, 50, 10, Direction.DOWN, startSnake, opponents);
+        var player = new Player(baseUri, startGame);
+
+        var snakeScreen = new SnakeScene(player);
         snakeScreen.setActive();
         stage.show();
 
-        new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(500);
-                    board.build();
-                    state.getGameObjects().forEach(GameObject::step);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+        new Thread(player).start();
     }
 
     public static void main(String[] args) {
+        App.port = 8080;
         launch();
     }
 }
