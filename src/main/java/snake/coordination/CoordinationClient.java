@@ -62,6 +62,16 @@ public class CoordinationClient {
         return (LobbyList) wrappedSpace.get(new LobbyList(null));
     }
 
+    //for joining a new lobby - connecting to a uri that contains the lobbyId
+    public void joinLobby(String lobbyId) throws URISyntaxException, IOException {
+
+        //lobbyUri should be changed to something else - this is temporary
+        URI lobbyUri = new URI("tcp://localhost:8111/" + lobbyId + "?keep");
+        //System.out.println("Trying to join: " + lobbyUri);
+        this.coordinationLobby = new RemoteSpace(lobbyUri);
+        System.out.println("joined: " + lobbyUri);
+    }
+
     public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException, InvocationTargetException, IllegalAccessException, InstantiationException {
         var playerId = UUID.randomUUID().toString();
         var port = new Random().nextInt(65535);
