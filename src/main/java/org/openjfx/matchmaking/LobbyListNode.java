@@ -1,33 +1,100 @@
 package org.openjfx.matchmaking;
 
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import org.openjfx.NodeProvider;
 import javafx.scene.control.Button;
+import snake.coordination.CoordinationClient;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class LobbyListNode implements NodeProvider {
-    private final GridPane lobbyUi = new GridPane();
+    private final BorderPane lobbyUi = new BorderPane();
+    private final GridPane topLobbyButtons = new GridPane();
+    private final GridPane lobbyButtons = new GridPane();
+    private final GridPane lobbyList = new GridPane();
 
-    public Button lobby1 = new Button("lobby1");
-    public Button lobby2 = new Button("lobby2");
-    public Button lobby3 = new Button("lobby3");
-    String lobbyToJoin = "yoyo";
+    private final List<String> lobbies = new ArrayList<>();
+    private String lobbyToJoin;
+    private final CoordinationClient coordinationClient;
 
-    ;
+    // Callback function when joined lobby
+    private final Runnable joinedLobbyCallback;
 
-    public LobbyListNode() throws URISyntaxException, IOException, InterruptedException, InvocationTargetException, IllegalAccessException, InstantiationException {
+    public LobbyListNode(CoordinationClient coordinationClient, Runnable joinedLobbyCallback) {
+        this.coordinationClient = coordinationClient;
+        this.joinedLobbyCallback = joinedLobbyCallback;
 
-        lobbyUi.add(lobby1,0,0);
-        lobbyUi.add(lobby2,0,1);
-        lobbyUi.add(lobby3,0,2);
+        var createLobbyButton = new Button("Create Lobby");
+        var refreshLobbyButton = new Button("Refresh Lobby List");
 
+        var joinLobbyButton = new Button("Join Lobby");
+
+        createLobbyButton.setOnAction(e -> {
+            try {
+                coordinationClient.createLobby();
+            } catch (Exception err) {
+                err.printStackTrace();
+            }
+        });
+
+        refreshLobbyButton.setOnAction(e -> {
+            try {
+                var lobbies = coordinationClient.listLobbies();
+                this.lobbies.clear();
+                this.lobbies.addAll(List.of(lobbies.lobbies()));
+                this.fillLobbyList();
+            } catch (Exception err) {
+                err.printStackTrace();
+            }
+        });
+
+        joinLobbyButton.setOnAction(e -> {
+            try {
+                coordinationClient.joinLobby(lobbyToJoin);
+                joinedLobbyCallback.run();
+            } catch (Exception err) {
+                err.printStackTrace();
+            }
+        });
+
+        topLobbyButtons.setAlignment(Pos.CENTER);
+        topLobbyButtons.setHgap(10);
+        topLobbyButtons.add(createLobbyButton, 0, 0);
+        topLobbyButtons.add(refreshLobbyButton, 1, 0);
+
+        lobbyButtons.setAlignment(Pos.CENTER);
+        lobbyButtons.setHgap(10);
+        lobbyButtons.add(joinLobbyButton, 0, 0);
+
+        lobbyList.setAlignment(Pos.CENTER);
+        lobbyList.setHgap(10);
+
+        lobbyUi.setTop(topLobbyButtons);
+        lobbyUi.setCenter(lobbyList);
+        lobbyUi.setBottom(lobbyButtons);
+
+        this.fillLobbyList();
+    }
+
+    private void fillLobbyList() {
+        lobbyList.getChildren().clear();
+
+        for (int i = 0; i < lobbies.size(); i++) {
+            Button lobby = new Button(lobbies.get(i));
+            int finalI = i;
+
+            lobby.setOnAction(e -> {
+                lobbyToJoin = lobbies.get(finalI);
+            });
+
+            lobbyList.add(lobby, 0, i);
+        }
     }
 
     @Override
@@ -35,27 +102,12 @@ public class LobbyListNode implements NodeProvider {
 
     }
 
+    public String getLobbyToJoin() {
+        return lobbyToJoin;
+    }
+
     @Override
     public Node getNode() {
         return lobbyUi;
     }
-
-
-    public void chooseLobby() {
-        lobby1.setOnAction(e -> {
-            System.out.println("do something lobby1");
-            lobbyToJoin = "lobby1";
-        });
-        lobby2.setOnAction(e -> {
-            System.out.println("do something lobby2");
-            lobbyToJoin = "lobby2";
-
-        });
-        lobby3.setOnAction(e -> {
-            System.out.println("do something lobby3");
-            lobbyToJoin = "lobby3";
-
-        });
-    }
-
 }

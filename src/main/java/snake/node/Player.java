@@ -4,9 +4,8 @@ import org.jspace.SequentialSpace;
 import org.jspace.SpaceRepository;
 import snake.common.Point;
 import snake.protocol.MessageSpace;
-import snake.protocol.coordination.OpponentInfo;
 import snake.protocol.coordination.StartGame;
-import snake.protocol.state.Fragment;
+import snake.protocol.state.StateUpdate;
 import snake.state.Board;
 import snake.state.Fruit;
 import snake.state.GameObject;
@@ -61,7 +60,7 @@ public class Player implements Runnable {
         return snake;
     }
 
-    public void putFragment(Fragment fragment) {
+    public void putFragment(StateUpdate fragment) {
         // Send to all opponents
         this.opponents.stream().map(Opponent::getSpace).forEach(space -> {
             try {
@@ -87,7 +86,7 @@ public class Player implements Runnable {
         opponents.forEach(Opponent::spawn);
 
         for (int i = 0; i < fruits.length; i++) {
-            fruits[i] = new Fruit(board, seed);
+            // fruits[i] = new Fruit(board, seed);
             // state.getGameObjects().add(fruits[i]);
         }
 
@@ -102,10 +101,10 @@ public class Player implements Runnable {
                 Thread.sleep(1000);
 
                 // Step all and build board.
-                state.getGameObjects().forEach(GameObject::step);
+                state.step();
                 board.build();
 
-                var fragment = new Fragment(snake.getStep(), snake.getDehydratedSnake().toArray(new Point[0]), true);
+                var fragment = new StateUpdate(state.getStep(), snake.getDehydratedSnake().toArray(new Point[0]));
                 putFragment(fragment);
             } catch (Exception e) {
                 throw new RuntimeException(e);

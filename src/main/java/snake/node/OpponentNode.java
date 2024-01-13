@@ -4,7 +4,7 @@ import org.jspace.RemoteSpace;
 import snake.protocol.MessageRegistry;
 import snake.protocol.MessageSpace;
 import snake.protocol.coordination.OpponentInfo;
-import snake.protocol.state.Fragment;
+import snake.protocol.state.StateUpdate;
 import snake.state.Snake;
 import snake.state.State;
 
@@ -44,12 +44,12 @@ public class OpponentNode implements Runnable {
         }
 
         var proxy = new MessageSpace(this.space);
-        var template = MessageRegistry.getMessageFactory(Fragment.class).toTemplate();
+        var template = MessageRegistry.getMessageFactory(StateUpdate.class).toTemplate();
 
         while (true) {
             try {
                 System.out.println("before receiving state update");
-                var stateUpdate = (Fragment) MessageRegistry.fromTuple(space.get(template));
+                var stateUpdate = (StateUpdate) MessageRegistry.fromTuple(space.get(template));
 
                 System.out.println("Received state update: " + stateUpdate);
 

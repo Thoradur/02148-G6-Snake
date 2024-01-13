@@ -4,5 +4,5 @@ import snake.common.Point;
 import snake.protocol.Message;
 
 @Message(name = "fragment", compact = false)
-public record Fragment(Integer step, Point[] compactSnake, Boolean ack) {
+public record StateUpdate(Integer step, Point[] compactSnake) {
 }

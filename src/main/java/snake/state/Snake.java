@@ -2,7 +2,7 @@ package snake.state;
 
 import snake.common.Direction;
 import snake.common.Point;
-import snake.protocol.state.Fragment;
+import snake.protocol.state.StateUpdate;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -10,7 +10,6 @@ import java.util.stream.IntStream;
 import javafx.application.Platform;
 
 public class Snake implements GameObject {
-    private int step = 0;
     boolean isDead = false;
     private final LinkedList<Point> snake = new LinkedList<>();
     private Direction direction;
@@ -40,17 +39,9 @@ public class Snake implements GameObject {
         return uniquePoints.size();
     }
 
-    @Override
-    public int getStep() {
-        return step;
-    }
-
-    public Fragment step() {
-        step++;
+    public void step() {
         snake.addFirst(getHead().add(this.direction));
         snake.removeLast();
-
-        return new Fragment(step, getDehydratedSnake().toArray(new Point[0]), true);
     }
 
     public void grow(int size) {
@@ -99,9 +90,9 @@ public class Snake implements GameObject {
 
         // Check for collision with fruit
         for (var gameObject : headCell.getStack()) {
-            if (gameObject instanceof Fruit) {
+            if (gameObject instanceof Fruit f) {
                 grow(1);
-                ((Fruit) gameObject).positionFruit(board, new Random().nextInt());
+                f.positionFruit(board, new Random().nextInt());
                 // Handle collision with fruit
             }
         }
@@ -212,7 +203,7 @@ public class Snake implements GameObject {
                 System.exit(0);
             }
 
-            if(getTail().equals(point) && cell.getStack().contains(this)){
+            if (getTail().equals(point) && cell.getStack().contains(this)) {
                 break;
             }
             cell.getStack().push(this);

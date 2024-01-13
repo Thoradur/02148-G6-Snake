@@ -26,7 +26,16 @@ public class CoordinationClient {
     public CoordinationClient(String playerId, URI playerURI, URI coordinationServerUri) throws IOException {
         this.playerId = playerId;
         this.playerURI = playerURI;
+        this.coordinationServerUri = coordinationServerUri;
         this.coordinationWaitingRoom = new RemoteSpace(coordinationServerUri);
+    }
+
+    public String getPlayerId() {
+        return playerId;
+    }
+
+    public URI getPlayerURI() {
+        return playerURI;
     }
 
     public void sendPlayerInfo() throws InterruptedException, InvocationTargetException, IllegalAccessException {
@@ -63,12 +72,13 @@ public class CoordinationClient {
     }
 
     //for joining a new lobby - connecting to a uri that contains the lobbyId
-    public void joinLobby(String lobbyId) throws URISyntaxException, IOException {
-
+    public void joinLobby(String lobbyId) throws URISyntaxException, IOException, InterruptedException, InvocationTargetException, IllegalAccessException {
         //lobbyUri should be changed to something else - this is temporary
-        URI lobbyUri = new URI("tcp://localhost:8111/" + lobbyId + "?keep");
+        URI lobbyUri = new URI("tcp://" + coordinationServerUri.getHost() + ":" + coordinationServerUri.getPort() + "/" + lobbyId + "?keep");
         //System.out.println("Trying to join: " + lobbyUri);
         this.coordinationLobby = new RemoteSpace(lobbyUri);
+        this.sendPlayerInfo();
+
         System.out.println("joined: " + lobbyUri);
     }
 

@@ -13,22 +13,25 @@ import java.net.URISyntaxException;
 public class MatchMakingScene implements SceneProvider {
     private final Scene scene;
     private final BorderPane root = new BorderPane();
-    CoordinationClient coordinationClient = new CoordinationClient("hej", new URI(""), new URI("tcp://localhost:8111/waiting?keep"));
+    private CoordinationClient coordinationClient;
+    private LobbyListNode lobbyListNode;
+    private InLobbyNode inLobbyNode;
 
-
-    public MatchMakingScene() throws URISyntaxException, IOException, InterruptedException, InvocationTargetException, IllegalAccessException, InstantiationException {
+    public MatchMakingScene(String playerId, URI clientURI, URI serverURI) {
         this.scene = new Scene(root);
 
-        LobbyListNode lobbyListNode = new LobbyListNode();
-        root.setCenter(lobbyListNode.getNode());
-        lobbyListNode.chooseLobby();
-        //lobbyToJoin contains the string of the name of the lobby the user clicked
-        //This is where we join a lobby - but it does not run I think
-        coordinationClient.joinLobby(lobbyListNode.lobbyToJoin);
-        coordinationClient.createLobby();
-        coordinationClient.listLobbies();
+        try {
+            this.coordinationClient = new CoordinationClient(playerId, clientURI, URI.create("tcp://" + serverURI.getHost() + ":" + serverURI.getPort() + "/waiting?keep"));
+            this.inLobbyNode = new InLobbyNode(this.coordinationClient);
 
-        //root.setCenter(new InLobbyNode().getNode());
+            this.lobbyListNode = new LobbyListNode(this.coordinationClient, () -> {
+                this.root.setCenter(this.inLobbyNode.getNode());
+            });
+
+            this.root.setCenter(this.lobbyListNode.getNode());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

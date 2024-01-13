@@ -15,6 +15,7 @@ public class StartScreenScene implements SceneProvider {
         var startScreenNode = new StartScreenNode();
         this.scene = new Scene(root);
         startScreenNode.setScene(this.scene);
+
         root.setCenter(startScreenNode.getNode());
         root.setPrefWidth(800);
         root.setPrefHeight(600);

@@ -1,6 +1,6 @@
 package snake.state;
 
-import snake.protocol.state.Fragment;
+import snake.protocol.state.StateUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,22 +8,40 @@ import java.util.Random;
 import java.util.Stack;
 
 public class State {
-    private final Random random;
+    private int step = 0;
+    private int currentSeed = 0;
+    private final Random baseRandom;
     private final List<GameObject> gameObjects = new ArrayList<>();
     private final Stack<Layer> layers = new Stack<>();
 
     private Board board = null;
 
     public State() {
-        this.random = new Random();
+        this.baseRandom = new Random();
     }
 
     public State(int seed) {
-        this.random = new Random(seed);
+        this.baseRandom = new Random(seed);
     }
 
     public List<GameObject> getGameObjects() {
         return gameObjects;
+    }
+
+    public int getStep() {
+        return step;
+    }
+
+    public Random getRandom() {
+        return new Random(currentSeed);
+    }
+
+    public void step() {
+        // Derive a new seed from the initial seed.
+        currentSeed = baseRandom.nextInt();
+        step++;
+
+        gameObjects.forEach(GameObject::step);
     }
 
     public Board getBoard() {
@@ -34,13 +52,13 @@ public class State {
         this.board = board;
     }
 
-    public void apply(Fragment fragment) {
+    public void apply(StateUpdate fragment) {
         var layer = layers.peek();
 
         layer.add(fragment);
     }
 
-    public void unapply(Fragment fragment) {
+    public void unapply(StateUpdate fragment) {
         var layer = layers.peek();
 
         layer.remove(fragment);

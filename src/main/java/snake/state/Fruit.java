@@ -3,26 +3,17 @@ package snake.state;
 import java.util.Random;
 
 import snake.common.Point;
-import snake.protocol.state.Fragment;
+import snake.protocol.state.StateUpdate;
 
 public class Fruit implements GameObject {
-
-    Point position;
+    private Point position;
 
     public Fruit(Point position) {
         this.position = position;
     }
 
-    public Fruit(Board board, int seed) {
-        positionFruit(board, seed);
-    }
-
     public Point getPosition() {
         return position;
-    }
-
-    public void setPosition(Point position) {
-        this.position = position;
     }
 
     @Override
@@ -38,19 +29,12 @@ public class Fruit implements GameObject {
             int y = random.nextInt(board.getHeight());
             Point position = new Point(x, y);
             if (board.getCell(position).getStack().isEmpty()) {
-                setPosition(position);
                 break;
             }
         }
     }
 
     @Override
-    public int getStep() {
-        return 0;
-    }
-
-    @Override
-    public Fragment step() {
-        return null;
+    public void step() {
     }
 }

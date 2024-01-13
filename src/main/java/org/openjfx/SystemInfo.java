@@ -15,7 +15,7 @@ public class SystemInfo {
     /**
      * Find available port for p2p communication
      */
-    public static int getClientPort() {
+    public static Integer getClientPort() {
         int s = 49152, e = 65535;
         var r = new Random();
 
