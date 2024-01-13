@@ -21,7 +21,14 @@ public class SnakeScene implements SceneProvider {
         this.snakeCanvas.setScene(scene);
         this.root.getChildren().add(snakeCanvas.getNode());
 
+        
+
         this.scene.setOnKeyPressed(e -> {
+            switch (e.getCode()) {
+                case P -> player.getSnake().grow(3);
+                default -> {}
+            };
+
             var nextDirection = switch (e.getCode()) {
                 case UP, W -> Direction.UP;
                 case LEFT, A -> Direction.LEFT;

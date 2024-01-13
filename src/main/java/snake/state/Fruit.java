@@ -6,11 +6,15 @@ import snake.common.Point;
 import snake.protocol.state.Fragment;
 
 public class Fruit implements GameObject {
-    
+
     Point position;
-    
+
     public Fruit(Point position) {
         this.position = position;
+    }
+
+    public Fruit(Board board, int seed) {
+        positionFruit(board, seed);
     }
 
     public Point getPosition() {
@@ -24,16 +28,16 @@ public class Fruit implements GameObject {
     @Override
     public void build(Board board) {
         board.getCell(position).getStack().push(this);
-        
+
     }
 
     public void positionFruit(Board board, int seed) {
         Random random = new Random(seed);
-        while(true){
+        while (true) {
             int x = random.nextInt(board.getWidth());
             int y = random.nextInt(board.getHeight());
             Point position = new Point(x, y);
-            if(board.getCell(position).getStack().isEmpty()){
+            if (board.getCell(position).getStack().isEmpty()) {
                 setPosition(position);
                 break;
             }

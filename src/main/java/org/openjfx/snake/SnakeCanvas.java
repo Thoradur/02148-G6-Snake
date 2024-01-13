@@ -28,7 +28,7 @@ public class SnakeCanvas implements NodeProvider {
         this.state = player.getState();
         this.board = state.getBoard();
         this.canvas = new Canvas(0, 0);
-        this.timeline = new Timeline(new KeyFrame(Duration.millis(125), e -> draw()));
+        this.timeline = new Timeline(new KeyFrame(Duration.millis(1000), e -> draw()));
         this.timeline.setCycleCount(Animation.INDEFINITE);
         this.timeline.play();
     }
