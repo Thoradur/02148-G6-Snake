@@ -8,6 +8,7 @@ import snake.protocol.coordination.OpponentInfo;
 import snake.protocol.coordination.StartGame;
 import snake.protocol.state.Fragment;
 import snake.state.Board;
+import snake.state.Fruit;
 import snake.state.GameObject;
 import snake.state.Snake;
 import snake.state.State;
@@ -21,8 +22,13 @@ public class Player implements Runnable {
     private State state;
     private Board board;
     private Snake snake;
+
+    //i created a var for the random seed, probs need to be else where, but its here
+    private int seed = 10;
+
     private SpaceRepository repository = new SpaceRepository();
     private final List<Opponent> opponents = new ArrayList<>();
+    private final Fruit[] fruits = new Fruit[10];
 
     public Player(URI uri, StartGame startGame) {
         this.uri = uri;
@@ -80,9 +86,20 @@ public class Player implements Runnable {
         // Start all opponents
         opponents.forEach(Opponent::spawn);
 
+        for (int i = 0; i < fruits.length; i++) {
+            fruits[i] = new Fruit(board, seed);
+            // state.getGameObjects().add(fruits[i]);
+        }
+
+        for (int i = 0; i < fruits.length; i++) {
+            // fruits[i] = new Fruit(board, seed);
+            state.getGameObjects().add(fruits[i]);
+        }
+
+
         while (true) {
             try {
-                Thread.sleep(250);
+                Thread.sleep(1000);
 
                 // Step all and build board.
                 state.getGameObjects().forEach(GameObject::step);

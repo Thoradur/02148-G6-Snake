@@ -45,6 +45,13 @@ public class Board {
         for (var gameObject : state.getGameObjects()) {
             gameObject.build(this);
         }
+
+        for(var gameObject : state.getGameObjects()){
+            if (gameObject instanceof Snake s) {
+                s.collision(this);;
+            }
+
+        }
     }
 
     public Stream<Cell> stream() {
@@ -52,8 +59,11 @@ public class Board {
     }
 
     public Cell getCell(Point point) {
-        // If cell is out of bounds, wrap it around
-        return cells[point.x()][point.y()];
+        try {
+            return cells[point.x()][point.y()];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return null;
+        }
     }
 
     public String toString() {

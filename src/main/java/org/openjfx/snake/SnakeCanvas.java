@@ -15,6 +15,8 @@ import snake.node.Player;
 import snake.state.Board;
 import snake.state.Snake;
 import snake.state.State;
+import snake.state.Fruit;
+import snake.common.Point; 
 
 public class SnakeCanvas implements NodeProvider {
     private final Timeline timeline;
@@ -26,7 +28,7 @@ public class SnakeCanvas implements NodeProvider {
         this.state = player.getState();
         this.board = state.getBoard();
         this.canvas = new Canvas(0, 0);
-        this.timeline = new Timeline(new KeyFrame(Duration.millis(500), e -> draw()));
+        this.timeline = new Timeline(new KeyFrame(Duration.millis(1000), e -> draw()));
         this.timeline.setCycleCount(Animation.INDEFINITE);
         this.timeline.play();
     }
@@ -58,6 +60,9 @@ public class SnakeCanvas implements NodeProvider {
             if (gameObject instanceof Snake s) {
                 drawSnake(gc, s);
             }
+            if(gameObject instanceof Fruit f){
+                drawFruit(gc, f.getPosition());
+            }
         });
     }
 
@@ -65,13 +70,24 @@ public class SnakeCanvas implements NodeProvider {
         int cellSize = getCellSize();
 
         //draws snake
-        gc.setFill(Color.web("00FF00"));
+        if(!snake.isDead()){
+            gc.setFill(Color.web("00FF00"));
+        }else{
+            gc.setFill(Color.web("FF0000"));
+        }
         gc.fillRect(snake.getHead().x() * cellSize, snake.getHead().y() * cellSize, cellSize - 1, cellSize - 1);
 
         var snakeBody = snake.getSnake();
         for (int i = 1; i < snakeBody.size(); i++) {
-            gc.fillRoundRect(snakeBody.get(i).x() * cellSize, snakeBody.get(i).y() * cellSize, cellSize - 1, cellSize - 1, 20, 20);
+            gc.fillRoundRect(snakeBody.get(i).x() * cellSize, snakeBody.get(i).y() * cellSize, cellSize - 1,
+                    cellSize - 1, 20, 20);
         }
+    }
+    
+    public void drawFruit(GraphicsContext gc, Point position){
+        int cellSize = getCellSize();
+        gc.setFill(Color.web("FF0000"));
+        gc.fillRect(position.x() * cellSize, position.y() * cellSize, cellSize - 1, cellSize - 1);
     }
 
     @Override

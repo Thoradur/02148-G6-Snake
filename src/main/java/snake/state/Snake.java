@@ -7,8 +7,11 @@ import snake.protocol.state.Fragment;
 import java.util.*;
 import java.util.stream.IntStream;
 
+import javafx.application.Platform;
+
 public class Snake implements GameObject {
     private int step = 0;
+    boolean isDead = false;
     private final LinkedList<Point> snake = new LinkedList<>();
     private Direction direction;
 
@@ -20,6 +23,10 @@ public class Snake implements GameObject {
     /**
      * Instantiate a snake based on a minimal amount of information.
      */
+    public boolean isDead() {
+        return isDead;
+    }
+
     public Snake(List<Point> dehydratedSnake) {
         setDehydratedSnake(dehydratedSnake);
     }
@@ -63,6 +70,41 @@ public class Snake implements GameObject {
 
     public Direction getDirection() {
         return direction;
+    }
+
+    public void collision(Board board) {
+        Cell headCell = board.getCell(getHead());
+
+        // Check for collision with other snakes
+        for (var gameObject : headCell.getStack()) {
+            if (gameObject instanceof Snake otherSnake) {
+                if (otherSnake != this) {
+                    System.out.println("Snake has collided with another snake");
+                    isDead = true;
+                    // Handle collision with another snake
+                    return;
+                }
+            }
+        }
+
+        // Check for collision with itself
+        for (var point : snake) {
+            if (point != getHead() && point.equals(getHead())) {
+                System.out.println("Snake has collided with itself");
+                isDead = true;
+                // Handle self-collision
+                return;
+            }
+        }
+
+        // Check for collision with fruit
+        for (var gameObject : headCell.getStack()) {
+            if (gameObject instanceof Fruit) {
+                grow(1);
+                ((Fruit) gameObject).positionFruit(board, new Random().nextInt());
+                // Handle collision with fruit
+            }
+        }
     }
 
     public void setDirection(Direction direction) {
@@ -111,9 +153,13 @@ public class Snake implements GameObject {
         // Add all tail points
         var tailPoint = getTail();
 
-        // Count tail points in self by iterating backwards and stopping at the first non-tail point (use stream)
-        var tailPoints = (int) IntStream.range(0, snake.size()).mapToObj(i -> snake.get(snake.size() - i - 1)).takeWhile(tailPoint::equals).count();
-        var tailPointsOther = (int) IntStream.range(0, dehydratedSnake.size()).mapToObj(i -> dehydratedSnake.get(dehydratedSnake.size() - i - 1)).takeWhile(tailPoint::equals).count();
+        // Count tail points in self by iterating backwards and stopping at the first
+        // non-tail point (use stream)
+        var tailPoints = (int) IntStream.range(0, snake.size()).mapToObj(i -> snake.get(snake.size() - i - 1))
+                .takeWhile(tailPoint::equals).count();
+        var tailPointsOther = (int) IntStream.range(0, dehydratedSnake.size())
+                .mapToObj(i -> dehydratedSnake.get(dehydratedSnake.size() - i - 1)).takeWhile(tailPoint::equals)
+                .count();
 
         // Add missing tail points
         IntStream.range(0, tailPoints - tailPointsOther).forEach(i -> dehydratedSnake.add(tailPoint));
@@ -124,7 +170,8 @@ public class Snake implements GameObject {
     public void setDehydratedSnake(List<Point> dehydratedSnake) {
         snake.clear();
 
-        if (dehydratedSnake.isEmpty()) return;
+        if (dehydratedSnake.isEmpty())
+            return;
 
         var tail = dehydratedSnake.getLast();
 
@@ -159,7 +206,15 @@ public class Snake implements GameObject {
     public void build(Board board) {
         for (var point : snake) {
             var cell = board.getCell(point);
+            if (cell == null) {
+                System.out.println("Snake is out of bounds: " + point);
+                Platform.exit();
+                System.exit(0);
+            }
 
+            if(getTail().equals(point) && cell.getStack().contains(this)){
+                break;
+            }
             cell.getStack().push(this);
         }
     }
@@ -169,7 +224,8 @@ public class Snake implements GameObject {
         StringBuilder stringSnake = new StringBuilder();
 
         for (var point : this.snake) {
-            if (!point.equals(this.getHead())) stringSnake.append(" -> ");
+            if (!point.equals(this.getHead()))
+                stringSnake.append(" -> ");
 
             stringSnake.append(point);
         }
