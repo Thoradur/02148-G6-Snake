@@ -16,10 +16,6 @@ public class Cell {
         return stack.isEmpty();
     }
 
-    public void clear() {
-        stack.clear();
-    }
-
     public Stack<GameObject> getStack() {
         return stack;
     }

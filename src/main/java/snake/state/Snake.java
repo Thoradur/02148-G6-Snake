@@ -90,10 +90,10 @@ public class Snake implements GameObject {
 
         // Check for collision with fruit
         for (var gameObject : headCell.getStack()) {
+            // Handle collision with fruit
             if (gameObject instanceof Fruit f) {
                 grow(1);
-                f.positionFruit(board, new Random().nextInt());
-                // Handle collision with fruit
+                board.getState().getGameObjects().remove(f);
             }
         }
     }
@@ -146,11 +146,8 @@ public class Snake implements GameObject {
 
         // Count tail points in self by iterating backwards and stopping at the first
         // non-tail point (use stream)
-        var tailPoints = (int) IntStream.range(0, snake.size()).mapToObj(i -> snake.get(snake.size() - i - 1))
-                .takeWhile(tailPoint::equals).count();
-        var tailPointsOther = (int) IntStream.range(0, dehydratedSnake.size())
-                .mapToObj(i -> dehydratedSnake.get(dehydratedSnake.size() - i - 1)).takeWhile(tailPoint::equals)
-                .count();
+        var tailPoints = (int) IntStream.range(0, snake.size()).mapToObj(i -> snake.get(snake.size() - i - 1)).takeWhile(tailPoint::equals).count();
+        var tailPointsOther = (int) IntStream.range(0, dehydratedSnake.size()).mapToObj(i -> dehydratedSnake.get(dehydratedSnake.size() - i - 1)).takeWhile(tailPoint::equals).count();
 
         // Add missing tail points
         IntStream.range(0, tailPoints - tailPointsOther).forEach(i -> dehydratedSnake.add(tailPoint));
@@ -161,8 +158,7 @@ public class Snake implements GameObject {
     public void setDehydratedSnake(List<Point> dehydratedSnake) {
         snake.clear();
 
-        if (dehydratedSnake.isEmpty())
-            return;
+        if (dehydratedSnake.isEmpty()) return;
 
         var tail = dehydratedSnake.getLast();
 
@@ -215,8 +211,7 @@ public class Snake implements GameObject {
         StringBuilder stringSnake = new StringBuilder();
 
         for (var point : this.snake) {
-            if (!point.equals(this.getHead()))
-                stringSnake.append(" -> ");
+            if (!point.equals(this.getHead())) stringSnake.append(" -> ");
 
             stringSnake.append(point);
         }
