@@ -16,18 +16,23 @@ public class SnakeCanvas implements NodeProvider {
     private final Canvas canvas;
     private final State state;
     private final Board board;
+    private final Player player;
+    public static final int CELL_SIZE = 20;
 
     public SnakeCanvas(Player player) {
         this.state = player.getState();
         this.board = state.getBoard();
-        this.canvas = new Canvas(0, 0);
+        this.canvas = new Canvas(this.board.getWidth() * CELL_SIZE, this.board.getHeight() * CELL_SIZE);
+        this.player = player;
     }
 
     public int getCellSize() {
-        return (int) Math.min(canvas.getHeight(), canvas.getWidth()) / board.getWidth();
+        // return (int) Math.min(canvas.getHeight(), canvas.getWidth()) / board.getWidth();
+        return CELL_SIZE;
     }
 
     public void draw() {
+        long startTime = System.nanoTime();
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
@@ -45,6 +50,7 @@ public class SnakeCanvas implements NodeProvider {
                 gc.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
             }
         }
+        System.out.println("Drawing background took " + (System.nanoTime() - startTime) / 1000000 + "ms");
 
         state.getGameObjects().forEach(gameObject -> {
             if (gameObject instanceof Snake s) {
@@ -54,6 +60,7 @@ public class SnakeCanvas implements NodeProvider {
                 drawFruit(gc, f);
             }
         });
+         System.out.println("Drawing background took after snakes and fruit " + (System.nanoTime() - startTime) / 1000000 + "ms");
     }
 
     public void drawSnake(GraphicsContext gc, Snake snake) {
@@ -61,7 +68,12 @@ public class SnakeCanvas implements NodeProvider {
 
         //draws snake
         if (!snake.isDead()) {
-            gc.setFill(Color.web("00FF00"));
+            if (player.getSnake() == snake) {
+                gc.setFill(Color.web("00FF00"));
+            }
+            else {
+                gc.setFill(Color.web("0000FF"));
+            }
         } else {
             gc.setFill(Color.web("FF0000"));
         }
@@ -82,8 +94,8 @@ public class SnakeCanvas implements NodeProvider {
 
     @Override
     public void setScene(Scene parent) {
-        canvas.widthProperty().bind(parent.widthProperty());
-        canvas.heightProperty().bind(parent.heightProperty());
+        // canvas.widthProperty().bind(parent.widthProperty());
+        // canvas.heightProperty().bind(parent.heightProperty());
     }
 
     @Override
