@@ -42,9 +42,7 @@ public class SnakeScene implements SceneProvider {
                 case RIGHT, D -> Direction.RIGHT;
                 default -> null;
             };
-
-            System.out.println("Current direction: " + player.getSnake().getDirection() + ", next direction: " + nextDirection);
-
+            
             if (nextDirection != null && !player.getSnake().getDirection().isOpposite(nextDirection)) {
                 player.getSnake().setDirection(nextDirection);
                 System.out.println("Changing direction to " + nextDirection);
