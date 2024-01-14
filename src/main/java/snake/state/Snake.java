@@ -40,6 +40,7 @@ public class Snake implements GameObject {
     }
 
     public void step() {
+        System.out.println("Snake is stepping in direction: " + this.direction);
         snake.addFirst(getHead().add(this.direction));
         snake.removeLast();
     }
@@ -63,6 +64,10 @@ public class Snake implements GameObject {
         return direction;
     }
 
+    public void kill() {
+        isDead = true;
+    }
+
     public void collision(Board board) {
         Cell headCell = board.getCell(getHead());
 
@@ -71,7 +76,7 @@ public class Snake implements GameObject {
             if (gameObject instanceof Snake otherSnake) {
                 if (otherSnake != this) {
                     System.out.println("Snake has collided with another snake");
-                    isDead = true;
+                    kill();
                     // Handle collision with another snake
                     return;
                 }
@@ -117,7 +122,7 @@ public class Snake implements GameObject {
     public List<Point> getDehydratedSnake() {
         List<Point> dehydratedSnake = new ArrayList<>();
 
-        Direction direction = null;
+        Direction localDirection = null;
 
         for (var i = 0; i < snake.size(); i++) {
             var point = snake.get(i);
@@ -130,14 +135,14 @@ public class Snake implements GameObject {
             var prevPoint = snake.get(i - 1);
             var nextDirection = Direction.fromPoints(prevPoint, point);
 
-            if (direction == null) {
-                direction = nextDirection;
+            if (localDirection == null) {
+                localDirection = nextDirection;
                 continue;
             }
 
-            if (direction != nextDirection) {
+            if (localDirection != nextDirection) {
                 dehydratedSnake.add(prevPoint);
-                direction = nextDirection;
+                localDirection = nextDirection;
             }
         }
 
@@ -169,8 +174,6 @@ public class Snake implements GameObject {
             }
 
             var prevPoint = snake.getLast();
-
-            direction = Direction.fromPoints(anchorPoint, prevPoint);
 
             if (prevPoint.equals(anchorPoint) && !anchorPoint.equals(tail)) {
                 throw new IllegalArgumentException("Snake is malformed: " + dehydratedSnake);

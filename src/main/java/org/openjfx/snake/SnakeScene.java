@@ -2,6 +2,8 @@ package org.openjfx.snake;
 
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.layout.BorderPane;
 import org.openjfx.SceneProvider;
 import snake.common.Direction;
 import snake.node.Player;
@@ -10,7 +12,7 @@ import snake.state.State;
 
 public class SnakeScene implements SceneProvider {
     private final Scene scene;
-    private final Group root = new Group();
+    private final BorderPane root = new BorderPane();
     private final Player player;
     private final SnakeCanvas snakeCanvas;
 
@@ -19,15 +21,19 @@ public class SnakeScene implements SceneProvider {
         this.scene = new Scene(root);
         this.snakeCanvas = new SnakeCanvas(player);
         this.snakeCanvas.setScene(scene);
-        this.root.getChildren().add(snakeCanvas.getNode());
+        Canvas canvas = (Canvas) snakeCanvas.getNode();
+        this.root.setCenter(canvas);
 
-        
+        this.root.prefWidthProperty().bind(canvas.widthProperty());
+        this.root.prefHeightProperty().bind(canvas.heightProperty());
 
         this.scene.setOnKeyPressed(e -> {
             switch (e.getCode()) {
                 case P -> player.getSnake().grow(3);
-                default -> {}
-            };
+                default -> {
+                }
+            }
+            ;
 
             var nextDirection = switch (e.getCode()) {
                 case UP, W -> Direction.UP;

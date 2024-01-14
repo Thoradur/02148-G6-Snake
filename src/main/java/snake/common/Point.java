@@ -61,6 +61,10 @@ public record Point(int x, int y) implements Comparable<Point>, Comparator<Point
         return new Point(rng.nextInt(width), rng.nextInt(height));
     }
 
+    public static Point random(Random rng, int w0, int w1, int h0, int h1) {
+        return new Point(rng.nextInt(w0, w1), rng.nextInt(h0, h1));
+    }
+
     public static Point random(Random rng) {
         return new Point(rng.nextInt(), rng.nextInt());
     }

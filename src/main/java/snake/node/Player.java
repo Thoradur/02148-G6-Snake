@@ -32,6 +32,9 @@ public class Player implements Runnable {
         this.snake.setDirection(startGame.startDirection());
         this.state.getGameObjects().add(this.snake);
 
+        // Print my snake identityHash
+        System.out.println("My snake: " + System.identityHashCode(this.snake));
+
         for (var opponentInfo : startGame.opponents()) {
             try {
                 var opponent = new Opponent(opponentInfo, state, repository);

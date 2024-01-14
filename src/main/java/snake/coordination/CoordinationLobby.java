@@ -23,11 +23,15 @@ public class CoordinationLobby implements Runnable {
         }
     }
 
+    public enum LobbyState {
+        WAITING, STARTED, FINISHED
+    }
+
     private final String lobbyId;
     private final HashMap<String, PlayerConnection> players = new HashMap<>();
     private final Space space = new SequentialSpace();
     private final CoordinationServer server;
-
+    private LobbyState state = LobbyState.WAITING;
 
     public CoordinationLobby(CoordinationServer server) {
         // Generate uuid lobby id
@@ -42,6 +46,10 @@ public class CoordinationLobby implements Runnable {
 
     public Space getSpace() {
         return space;
+    }
+
+    public LobbyState getState() {
+        return state;
     }
 
     @Override
@@ -82,6 +90,8 @@ public class CoordinationLobby implements Runnable {
                 if (players.size() >= 2) break;
             }
 
+            this.state = LobbyState.STARTED;
+
             HashMap<String, Point> initialPositions = new HashMap<>();
             HashMap<String, Direction> initialDirections = new HashMap<>();
             Random r = new Random();
@@ -97,7 +107,7 @@ public class CoordinationLobby implements Runnable {
 
                 // Ensure at least 2 spaces between snakes
                 while (true) {
-                    pos = Point.random(r, width - 10, height - 10);
+                    pos = Point.random(r, 10, width, 10, height);
 
                     Point finalPos = pos;
 
@@ -152,28 +162,12 @@ public class CoordinationLobby implements Runnable {
                     if (playerId.equals(opponentId)) continue;
 
                     var playerInfo = players.get(opponentId).info;
-                    var opponentInfo = new OpponentInfo(
-                            playerInfo.baseUri(),
-                            initialDirections.get(opponentId),
-                            initialPositions.get(opponentId),
-                            playerSecretMap.get(playerId).get(opponentId),
-                            playerSecretMap.get(opponentId).get(playerId)
-                    );
+                    var opponentInfo = new OpponentInfo(playerInfo.baseUri(), initialDirections.get(opponentId), initialPositions.get(opponentId), playerSecretMap.get(playerId).get(opponentId), playerSecretMap.get(opponentId).get(playerId));
 
                     opponentInfos.add(opponentInfo);
                 }
 
-                wrappedSpace.put(
-                        new StartGame(
-                                playerId,
-                                width,
-                                height,
-                                seed,
-                                initialDirections.get(playerId),
-                                initialPositions.get(playerId),
-                                opponentInfos.toArray(new OpponentInfo[0])
-                        )
-                );
+                wrappedSpace.put(new StartGame(playerId, width, height, seed, initialDirections.get(playerId), initialPositions.get(playerId), opponentInfos.toArray(new OpponentInfo[0])));
             }
 
             // this.server.removeLobby(this.lobbyId);

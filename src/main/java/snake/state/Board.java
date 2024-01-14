@@ -11,8 +11,8 @@ import java.util.stream.Stream;
  * A view of the state.
  */
 public class Board {
-    private int width;
-    private int height;
+    private final int width;
+    private final int height;
     private final Cell[][] cells;
     private final State state;
 

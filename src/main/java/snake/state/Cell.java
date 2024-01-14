@@ -5,8 +5,8 @@ import snake.common.Point;
 import java.util.Stack;
 
 public class Cell {
-    public Point position;
-    private Stack<GameObject> stack = new Stack<>();
+    public final Point position;
+    private final Stack<GameObject> stack = new Stack<>();
 
     public Cell(Point position) {
         this.position = position;

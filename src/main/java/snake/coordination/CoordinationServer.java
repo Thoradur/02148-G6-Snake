@@ -75,7 +75,10 @@ public class CoordinationServer implements Runnable {
 
                 if (nextMessage instanceof ListLobbies listLobbies) {
                     System.out.println("Listing lobbies");
-                    var lobbyIds = lobbies.values().stream().map(CoordinationLobby::getLobbyId).toList().toArray(new String[0]);
+                    var lobbyIds = lobbies.values().stream()
+                            .filter(lobby -> lobby.getState() == CoordinationLobby.LobbyState.WAITING)
+                            .map(CoordinationLobby::getLobbyId).toList().toArray(new String[0]);
+                    
                     wrappedWaitingRoom.put(new LobbyList(lobbyIds));
                 }
             }

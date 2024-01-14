@@ -19,7 +19,6 @@ public class Fruit implements GameObject {
     @Override
     public void build(Board board) {
         board.getCell(position).getStack().push(this);
-
     }
 
     @Override

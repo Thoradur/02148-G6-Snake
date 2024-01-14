@@ -35,7 +35,7 @@ public class OpponentNode implements Runnable {
     }
 
     public boolean isReady() {
-        return this.step == this.state.getStep();
+        return this.space != null && this.step == this.state.getStep() || this.snake.isDead();
     }
 
     @Override
@@ -72,6 +72,8 @@ public class OpponentNode implements Runnable {
                 if (prevHead.distanceTo(this.snake.getHead()) > 1) {
                     System.out.println("prev: " + prevHead + " new head: " + this.snake.getHead());
                     System.out.println("Snake moved more than one step, killing.");
+
+                    this.snake.kill();
 
                     break;
                 }

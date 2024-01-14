@@ -24,6 +24,7 @@ public class Opponent {
         this.snake = new Snake(List.of(opponentInfo.startPosition()));
         this.snake.setDirection(opponentInfo.startDirection());
         this.state.getGameObjects().add(this.snake);
+
         this.opponentNode = new OpponentNode(opponentInfo, this.state, this.snake);
         this.opponentThread = new Thread(opponentNode);
 

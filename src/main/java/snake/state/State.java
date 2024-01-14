@@ -13,8 +13,6 @@ public class State {
     private int currentSeed = 0;
     private final Random baseRandom;
     private final List<GameObject> gameObjects = new ArrayList<>();
-    private final Stack<Layer> layers = new Stack<>();
-
     private Board board = null;
 
     public State() {
@@ -51,17 +49,5 @@ public class State {
 
     public void setBoard(Board board) {
         this.board = board;
-    }
-
-    public void apply(StateUpdate fragment) {
-        var layer = layers.peek();
-
-        layer.add(fragment);
-    }
-
-    public void unapply(StateUpdate fragment) {
-        var layer = layers.peek();
-
-        layer.remove(fragment);
     }
 }
