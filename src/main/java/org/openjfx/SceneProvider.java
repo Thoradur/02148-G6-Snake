@@ -8,7 +8,12 @@ public interface SceneProvider {
     Scene getScene();
 
     default void setActive() {
-        SceneManager.getInstance().getStage().setScene(getScene());
-        SceneManager.getInstance().getStage().setTitle(getTitle());
+        var instance = SceneManager.getInstance();
+
+        if (instance.getSceneProvider(this.getClass()) != this) {
+            instance.registerSceneProvider(this.getClass(), this);
+        }
+
+        instance.setActive(this.getClass());
     }
 }

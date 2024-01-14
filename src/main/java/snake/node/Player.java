@@ -1,14 +1,13 @@
 package snake.node;
 
-import org.jspace.SequentialSpace;
 import org.jspace.SpaceRepository;
+import org.openjfx.SceneManager;
+import org.openjfx.snake.SnakeScene;
 import snake.common.Point;
 import snake.protocol.MessageSpace;
 import snake.protocol.coordination.StartGame;
 import snake.protocol.state.StateUpdate;
 import snake.state.Board;
-import snake.state.Fruit;
-import snake.state.GameObject;
 import snake.state.Snake;
 import snake.state.State;
 
@@ -21,13 +20,8 @@ public class Player implements Runnable {
     private State state;
     private Board board;
     private Snake snake;
-
-    //i created a var for the random seed, probs need to be else where, but its here
-    private int seed = 10;
-
     private SpaceRepository repository = new SpaceRepository();
     private final List<Opponent> opponents = new ArrayList<>();
-    private final Fruit[] fruits = new Fruit[10];
 
     public Player(URI uri, StartGame startGame) {
         this.uri = uri;
@@ -60,7 +54,7 @@ public class Player implements Runnable {
         return snake;
     }
 
-    public void putFragment(StateUpdate fragment) {
+    public void sendStateUpdate(StateUpdate fragment) {
         // Send to all opponents
         this.opponents.stream().map(Opponent::getSpace).forEach(space -> {
             try {
@@ -77,35 +71,43 @@ public class Player implements Runnable {
     public void run() {
         System.out.println("Listening on " + uri);
 
-        var opponentSpace = new SequentialSpace();
-
-        repository.add("opponent" + uri.getPort(), opponentSpace);
         repository.addGate(uri);
 
         // Start all opponents
         opponents.forEach(Opponent::spawn);
 
-        for (int i = 0; i < fruits.length; i++) {
-            // fruits[i] = new Fruit(board, seed);
-            // state.getGameObjects().add(fruits[i]);
-        }
-
-        for (int i = 0; i < fruits.length; i++) {
-            // fruits[i] = new Fruit(board, seed);
-            state.getGameObjects().add(fruits[i]);
-        }
-
+        long minimumDelta = 1000;
 
         while (true) {
+            long time = System.currentTimeMillis();
+
             try {
-                Thread.sleep(1000);
+                // Sleep for 1/60th of a second
+                Thread.sleep(1000 / 60);
+
+                // CHeck if all opponents are ready, reduce to a boolean
+                var allOpponentsReady = opponents.stream().map(Opponent::isReady).reduce(true, (a, b) -> a && b);
+
+                if (!allOpponentsReady) {
+                    continue;
+                }
+
+                long delta = System.currentTimeMillis() - time;
+
+                if (delta < minimumDelta) {
+                    Thread.sleep(minimumDelta - delta);
+                }
+
+                // Call draw on the canvas
+                SceneManager.getInstance().getSceneProvider(SnakeScene.class).getSnakeCanvas().draw();
 
                 // Step all and build board.
                 state.step();
                 board.build();
 
-                var fragment = new StateUpdate(state.getStep(), snake.getDehydratedSnake().toArray(new Point[0]));
-                putFragment(fragment);
+                var stateUpdate = new StateUpdate(state.getStep(), snake.getDehydratedSnake().toArray(new Point[0]));
+                sendStateUpdate(stateUpdate);
+
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

@@ -89,9 +89,8 @@ public class CoordinationLobby implements Runnable {
             int width = 50;
             int height = 50;
 
-
             for (var playerId : players.keySet()) {
-                var snake = new Snake(Point.random(r, width, height), Direction.random(r));
+                var snake = new Snake(Point.random(r, width - 10, height - 10), Direction.random(r));
                 initialDirections.put(playerId, snake.getDirection());
                 initialSnakes.put(playerId, snake.getDehydratedSnake().toArray(new Point[0]));
             }

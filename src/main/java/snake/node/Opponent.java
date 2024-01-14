@@ -30,6 +30,10 @@ public class Opponent {
         repository.add(opponentInfo.playerSecret(), space);
     }
 
+    public boolean isReady() {
+        return opponentNode.isReady();
+    }
+
     public Space getSpace() {
         return space;
     }

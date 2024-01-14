@@ -1,25 +1,18 @@
 package org.openjfx.snake;
 
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.util.Duration;
 import org.openjfx.NodeProvider;
 import snake.node.Player;
 import snake.state.Board;
 import snake.state.Snake;
 import snake.state.State;
 import snake.state.Fruit;
-import snake.common.Point; 
 
 public class SnakeCanvas implements NodeProvider {
-    private final Timeline timeline;
     private final Canvas canvas;
     private final State state;
     private final Board board;
@@ -28,9 +21,6 @@ public class SnakeCanvas implements NodeProvider {
         this.state = player.getState();
         this.board = state.getBoard();
         this.canvas = new Canvas(0, 0);
-        this.timeline = new Timeline(new KeyFrame(Duration.millis(1000), e -> draw()));
-        this.timeline.setCycleCount(Animation.INDEFINITE);
-        this.timeline.play();
     }
 
     public int getCellSize() {
@@ -60,8 +50,8 @@ public class SnakeCanvas implements NodeProvider {
             if (gameObject instanceof Snake s) {
                 drawSnake(gc, s);
             }
-            if(gameObject instanceof Fruit f){
-                drawFruit(gc, f.getPosition());
+            if (gameObject instanceof Fruit f) {
+                drawFruit(gc, f);
             }
         });
     }
@@ -70,9 +60,9 @@ public class SnakeCanvas implements NodeProvider {
         int cellSize = getCellSize();
 
         //draws snake
-        if(!snake.isDead()){
+        if (!snake.isDead()) {
             gc.setFill(Color.web("00FF00"));
-        }else{
+        } else {
             gc.setFill(Color.web("FF0000"));
         }
         gc.fillRect(snake.getHead().x() * cellSize, snake.getHead().y() * cellSize, cellSize - 1, cellSize - 1);
@@ -83,11 +73,11 @@ public class SnakeCanvas implements NodeProvider {
                     cellSize - 1, 20, 20);
         }
     }
-    
-    public void drawFruit(GraphicsContext gc, Point position){
+
+    public void drawFruit(GraphicsContext gc, Fruit fruit) {
         int cellSize = getCellSize();
         gc.setFill(Color.web("FF0000"));
-        gc.fillRect(position.x() * cellSize, position.y() * cellSize, cellSize - 1, cellSize - 1);
+        gc.fillRect(fruit.getPosition().x() * cellSize, fruit.getPosition().y() * cellSize, cellSize - 1, cellSize - 1);
     }
 
     @Override

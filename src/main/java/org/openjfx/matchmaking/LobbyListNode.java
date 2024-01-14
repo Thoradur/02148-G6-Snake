@@ -38,6 +38,7 @@ public class LobbyListNode implements NodeProvider {
         createLobbyButton.setOnAction(e -> {
             try {
                 coordinationClient.createLobby();
+                refreshLobbyButton.fire();
             } catch (Exception err) {
                 err.printStackTrace();
             }
@@ -79,7 +80,7 @@ public class LobbyListNode implements NodeProvider {
         lobbyUi.setCenter(lobbyList);
         lobbyUi.setBottom(lobbyButtons);
 
-        this.fillLobbyList();
+        refreshLobbyButton.fire();
     }
 
     private void fillLobbyList() {

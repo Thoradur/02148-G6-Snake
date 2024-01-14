@@ -46,6 +46,10 @@ public class SnakeScene implements SceneProvider {
         });
     }
 
+    public SnakeCanvas getSnakeCanvas() {
+        return snakeCanvas;
+    }
+
     @Override
     public String getTitle() {
         return "SnakeGame";

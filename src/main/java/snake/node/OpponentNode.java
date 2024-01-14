@@ -18,6 +18,8 @@ public class OpponentNode implements Runnable {
     private Snake snake;
     private State state;
 
+    private int step = 0;
+
     public OpponentNode(OpponentInfo info, State state, Snake snake) throws IOException {
         this.info = info;
         this.state = state;
@@ -28,37 +30,50 @@ public class OpponentNode implements Runnable {
         return space;
     }
 
+    public int getStep() {
+        return step;
+    }
+
+    public boolean isReady() {
+        return this.step == this.state.getStep();
+    }
+
     @Override
     public void run() {
         try {
             var uri = new URI("tcp://" + info.baseUri().getHost() + ":" + info.baseUri().getPort() + "/" + info.opponentSecret() + "?keep");
 
-            // SLeep for 5 seconds
-            System.out.println("Sleeping for 10 seconds waiting for server to start");
-            Thread.sleep(10000);
+            System.out.println("Sleeping for 2 seconds waiting for server to start");
+            Thread.sleep(2000);
 
             System.out.println("Connecting to " + uri);
+
             this.space = new RemoteSpace(uri);
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        var proxy = new MessageSpace(this.space);
-        var template = MessageRegistry.getMessageFactory(StateUpdate.class).toTemplate();
+        var messageSpace = new MessageSpace(this.space);
 
         while (true) {
             try {
-                System.out.println("before receiving state update");
-                var stateUpdate = (StateUpdate) MessageRegistry.fromTuple(space.get(template));
+                // Get next state update
+                var stateUpdate = (StateUpdate) messageSpace.get(new StateUpdate(this.step + 1, null));
+                this.step++;
 
                 System.out.println("Received state update: " + stateUpdate);
 
-                for (var gameObject : state.getGameObjects()) {
-                    if (gameObject instanceof Snake s && s == this.snake) {
+                var prevHead = this.snake.getHead();
 
-                        s.setDehydratedSnake(Arrays.asList(stateUpdate.compactSnake()));
-                    }
+                this.snake.setDehydratedSnake(Arrays.asList(stateUpdate.compactSnake()));
+
+                if (prevHead.distanceTo(this.snake.getHead()) > 1) {
+                    System.out.println("Snake moved more than one step, killing.");
+
+                    break;
                 }
+
 
             } catch (Exception e) {
                 System.out.println("Got error of type: " + e.getMessage());
