@@ -59,16 +59,18 @@ public class OpponentNode implements Runnable {
         while (true) {
             try {
                 // Get next state update
-                var stateUpdate = (StateUpdate) messageSpace.get(new StateUpdate(this.step + 1, null));
+                var stateUpdate = (StateUpdate) messageSpace.get(new StateUpdate(this.step + 1, null, null));
                 this.step++;
 
-                System.out.println("Received state update: " + stateUpdate);
+                System.out.println("Received state update: " + stateUpdate.step() + " - " + Arrays.toString(stateUpdate.compactSnake()));
 
                 var prevHead = this.snake.getHead();
 
                 this.snake.setDehydratedSnake(Arrays.asList(stateUpdate.compactSnake()));
+                this.snake.setDirection(stateUpdate.direction());
 
                 if (prevHead.distanceTo(this.snake.getHead()) > 1) {
+                    System.out.println("prev: " + prevHead + " new head: " + this.snake.getHead());
                     System.out.println("Snake moved more than one step, killing.");
 
                     break;

@@ -10,6 +10,6 @@ import java.net.URI;
  * @param opponentSecret The secret of the opponent
  * @param playerSecret   The secret of the player
  */
-public record OpponentInfo(URI baseUri, Direction startDirection, Point[] startSnake, String opponentSecret,
+public record OpponentInfo(URI baseUri, Direction startDirection, Point startPosition, String opponentSecret,
                            String playerSecret) {
 }

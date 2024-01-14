@@ -13,6 +13,7 @@ import snake.state.State;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Player implements Runnable {
@@ -27,7 +28,7 @@ public class Player implements Runnable {
         this.uri = uri;
         this.state = new State(startGame.seed());
         this.board = new Board(startGame.width(), startGame.height(), this.state);
-        this.snake = new Snake(List.of(startGame.startSnake()));
+        this.snake = new Snake(List.of(startGame.startPosition()));
         this.snake.setDirection(startGame.startDirection());
         this.state.getGameObjects().add(this.snake);
 
@@ -54,17 +55,17 @@ public class Player implements Runnable {
         return snake;
     }
 
-    public void sendStateUpdate(StateUpdate fragment) {
+    public void sendStateUpdate(StateUpdate update) {
         // Send to all opponents
         this.opponents.stream().map(Opponent::getSpace).forEach(space -> {
             try {
-                new MessageSpace(space).put(fragment);
+                new MessageSpace(space).put(update);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
 
-        System.out.println("Sent fragment: " + fragment);
+        System.out.println("Sent state update: " + update.step() + " - " + Arrays.toString(update.compactSnake()));
     }
 
     @Override
@@ -98,16 +99,22 @@ public class Player implements Runnable {
                     Thread.sleep(minimumDelta - delta);
                 }
 
-                // Call draw on the canvas
-                SceneManager.getInstance().getSceneProvider(SnakeScene.class).getSnakeCanvas().draw();
+                // Step all except opponent snakes and build board.
+                state.step(gameObject -> {
+                    if (gameObject instanceof Snake s) {
+                        return s == snake;
+                    }
 
-                // Step all and build board.
-                state.step();
+                    return true;
+                });
+
                 board.build();
 
-                var stateUpdate = new StateUpdate(state.getStep(), snake.getDehydratedSnake().toArray(new Point[0]));
+                var stateUpdate = new StateUpdate(state.getStep(), snake.getDirection(), snake.getDehydratedSnake().toArray(new Point[0]));
                 sendStateUpdate(stateUpdate);
 
+                // Call draw on the canvas
+                SceneManager.getInstance().getSceneProvider(SnakeScene.class).getSnakeCanvas().draw();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

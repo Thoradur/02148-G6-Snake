@@ -21,7 +21,7 @@ public class Opponent {
     public Opponent(OpponentInfo opponentInfo, State state, SpaceRepository repository) throws IOException {
         this.opponentInfo = opponentInfo;
         this.state = state;
-        this.snake = new Snake(List.of(opponentInfo.startSnake()));
+        this.snake = new Snake(List.of(opponentInfo.startPosition()));
         this.snake.setDirection(opponentInfo.startDirection());
         this.state.getGameObjects().add(this.snake);
         this.opponentNode = new OpponentNode(opponentInfo, this.state, this.snake);

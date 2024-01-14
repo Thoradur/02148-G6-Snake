@@ -16,7 +16,6 @@ public class MessageSpace implements MessageSpaceInterface {
     @Override
     public boolean put(Record message) throws InterruptedException, InvocationTargetException, IllegalAccessException {
         var msg = MessageRegistry.getMessageFactory(message).toTuple(message);
-        System.out.println("Putting: " + Arrays.toString(msg));
         return wrappedSpace.put(msg);
     }
 

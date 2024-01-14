@@ -13,7 +13,7 @@ public record StartGame(
         Integer height,
         Integer seed,
         Direction startDirection,
-        Point[] startSnake,
+        Point startPosition,
         OpponentInfo[] opponents
 ) {
 }

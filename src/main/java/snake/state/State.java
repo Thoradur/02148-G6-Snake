@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Stack;
+import java.util.function.Predicate;
 
 public class State {
     private int step = 0;
@@ -36,12 +37,12 @@ public class State {
         return new Random(currentSeed);
     }
 
-    public void step() {
+    public void step(Predicate<GameObject> predicate) {
         // Derive a new seed from the initial seed.
         currentSeed = baseRandom.nextInt();
         step++;
 
-        gameObjects.forEach(GameObject::step);
+        gameObjects.stream().filter(predicate).forEach(GameObject::step);
     }
 
     public Board getBoard() {

@@ -11,6 +11,7 @@ import snake.state.Snake;
 
 import java.net.URI;
 import java.util.*;
+import java.util.function.Predicate;
 
 public class CoordinationLobby implements Runnable {
     private static class PlayerConnection {
@@ -81,7 +82,7 @@ public class CoordinationLobby implements Runnable {
                 if (players.size() >= 2) break;
             }
 
-            HashMap<String, Point[]> initialSnakes = new HashMap<>();
+            HashMap<String, Point> initialPositions = new HashMap<>();
             HashMap<String, Direction> initialDirections = new HashMap<>();
             Random r = new Random();
 
@@ -90,9 +91,22 @@ public class CoordinationLobby implements Runnable {
             int height = 50;
 
             for (var playerId : players.keySet()) {
-                var snake = new Snake(Point.random(r, width - 10, height - 10), Direction.random(r));
-                initialDirections.put(playerId, snake.getDirection());
-                initialSnakes.put(playerId, snake.getDehydratedSnake().toArray(new Point[0]));
+                Point pos;
+
+                initialDirections.put(playerId, Direction.random(r));
+
+                // Ensure at least 2 spaces between snakes
+                while (true) {
+                    pos = Point.random(r, width - 10, height - 10);
+
+                    Point finalPos = pos;
+
+                    if (initialPositions.values().stream().allMatch(p -> p.distanceTo(finalPos) > 2)) {
+                        break;
+                    }
+                }
+
+                initialPositions.put(playerId, pos);
             }
 
             /* HashMap of every player id and their map of opponent secrets
@@ -141,7 +155,7 @@ public class CoordinationLobby implements Runnable {
                     var opponentInfo = new OpponentInfo(
                             playerInfo.baseUri(),
                             initialDirections.get(opponentId),
-                            initialSnakes.get(opponentId),
+                            initialPositions.get(opponentId),
                             playerSecretMap.get(playerId).get(opponentId),
                             playerSecretMap.get(opponentId).get(playerId)
                     );
@@ -156,7 +170,7 @@ public class CoordinationLobby implements Runnable {
                                 height,
                                 seed,
                                 initialDirections.get(playerId),
-                                initialSnakes.get(playerId),
+                                initialPositions.get(playerId),
                                 opponentInfos.toArray(new OpponentInfo[0])
                         )
                 );
