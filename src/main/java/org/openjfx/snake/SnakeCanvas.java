@@ -33,15 +33,19 @@ public class SnakeCanvas implements NodeProvider {
 
     public void draw() {
         long startTime = System.nanoTime();
+        System.out.println("S1");
         GraphicsContext gc = canvas.getGraphicsContext2D();
+        System.out.println("S2");
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        System.out.println("S3");
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
+        System.out.println("S4");
         int cellSize = getCellSize();
 
+        System.out.println("S5");
         // Draws background
-        for (int i = 0; i < board.getWidth() * cellSize; i++) {
-            for (int j = 0; j < board.getHeight() * cellSize; j++) {
+        for (int i = 0; i < board.getWidth(); i++) {
+            for (int j = 0; j < board.getHeight(); j++) {
                 if ((i + j) % 2 == 0) {
                     gc.setFill(Color.web("cbd1c5"));
                 } else {

@@ -3,12 +3,15 @@ package org.openjfx.snake;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import org.openjfx.SceneProvider;
 import snake.common.Direction;
 import snake.node.Player;
 import snake.state.Snake;
 import snake.state.State;
+
+import java.util.Objects;
 
 public class SnakeScene implements SceneProvider {
     private final Scene scene;
@@ -28,12 +31,9 @@ public class SnakeScene implements SceneProvider {
         this.root.prefHeightProperty().bind(canvas.heightProperty());
 
         this.scene.setOnKeyPressed(e -> {
-            switch (e.getCode()) {
-                case P -> player.getSnake().grow(3);
-                default -> {
-                }
+            if (Objects.requireNonNull(e.getCode()) == KeyCode.P) {
+                player.getSnake().grow(3);
             }
-            ;
 
             var nextDirection = switch (e.getCode()) {
                 case UP, W -> Direction.UP;

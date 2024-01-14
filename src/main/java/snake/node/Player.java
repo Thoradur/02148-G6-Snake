@@ -99,7 +99,9 @@ public class Player implements Runnable {
                 board.build();
 
                 // Call draw on the canvas
+                System.out.println("BEFORE DRAW");
                 SceneManager.getInstance().getSceneProvider(SnakeScene.class).getSnakeCanvas().draw();
+                System.out.println("AFTER DrAW");
 
                 long delta = System.currentTimeMillis() - time;
 
