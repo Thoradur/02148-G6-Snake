@@ -80,7 +80,7 @@ public class Player implements Runnable {
         // Start all opponents
         opponents.forEach(Opponent::spawn);
 
-        long minimumDelta = 500;
+        long minimumDelta = 1000;
 
         while (true) {
             long time = System.currentTimeMillis();
