@@ -56,7 +56,7 @@ public class OpponentNode implements Runnable {
 
         var messageSpace = new MessageSpace(this.space);
 
-        while (true) {
+        while (!snake.isDead()) {
             try {
                 // Get next state update
                 var stateUpdate = (StateUpdate) messageSpace.get(new StateUpdate(this.step + 1, null, null));
@@ -74,8 +74,6 @@ public class OpponentNode implements Runnable {
                     System.out.println("Snake moved more than one step, killing.");
 
                     this.snake.kill();
-
-                    break;
                 }
 
 
@@ -83,5 +81,7 @@ public class OpponentNode implements Runnable {
                 System.out.println("Got error of type: " + e.getMessage());
             }
         }
+
+        System.out.println("Opponent is dead, exiting");
     }
 }

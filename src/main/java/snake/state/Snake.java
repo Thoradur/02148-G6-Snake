@@ -196,15 +196,19 @@ public class Snake implements GameObject {
     public void build(Board board) {
         for (var point : snake) {
             var cell = board.getCell(point);
+
             if (cell == null) {
                 System.out.println("Snake is out of bounds: " + point);
-                Platform.exit();
-                System.exit(0);
+                kill();
+                break;
             }
 
+            // Ensure only one tail is appended
+            // to prevent tail self collisions.
             if (getTail().equals(point) && cell.getStack().contains(this)) {
                 break;
             }
+
             cell.getStack().push(this);
         }
     }
