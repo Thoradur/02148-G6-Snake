@@ -77,7 +77,8 @@ public class Board {
             stack.stream().filter(gameObject -> gameObject == snake).findFirst().ifPresent(stack::remove);
 
             // Check if any snakes are in the same cell as the head
-            var additionalSnakes = stack.stream().filter(go -> go instanceof Snake).map(go -> (Snake) go).toList();
+            // Also filter out dead snakes
+            var additionalSnakes = stack.stream().filter(go -> go instanceof Snake && !((Snake) go).isDead()).map(go -> (Snake) go).toList();
 
             for (var otherSnake : additionalSnakes) {
                 // If we hit any other snake in their heads, kill them
