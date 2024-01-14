@@ -97,8 +97,8 @@ public class CoordinationLobby implements Runnable {
             Random r = new Random();
 
             int seed = r.nextInt();
-            int width = 50;
-            int height = 50;
+            int width = 100;
+            int height = 100;
 
             for (var playerId : players.keySet()) {
                 Point pos;

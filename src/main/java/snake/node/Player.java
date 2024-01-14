@@ -60,7 +60,7 @@ public class Player implements Runnable {
 
     public void sendStateUpdate(StateUpdate update) {
         // Send to all opponents
-        this.opponents.stream().map(Opponent::getSpace).forEach(space -> {
+        this.opponents.stream().map(Opponent::getOutGoingSpace).forEach(space -> {
             try {
                 new MessageSpace(space).put(update);
             } catch (Exception e) {
@@ -78,9 +78,9 @@ public class Player implements Runnable {
         repository.addGate(uri);
 
         // Start all opponents
-        opponents.forEach(Opponent::spawn);
+        opponents.stream().map(Thread::new).forEach(Thread::start);
 
-        long minimumDelta = 1000;
+        long minimumDelta = 250;
 
         while (true) {
             long time = System.currentTimeMillis();
@@ -118,6 +118,12 @@ public class Player implements Runnable {
 
                 var stateUpdate = new StateUpdate(state.getStep(), snake.getDirection(), snake.getDehydratedSnake().toArray(new Point[0]));
                 sendStateUpdate(stateUpdate);
+
+                if (snake.isDead()) {
+                    System.out.println("You died!");
+                    break;
+                }
+
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
