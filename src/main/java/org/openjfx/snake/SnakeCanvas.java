@@ -60,7 +60,7 @@ public class SnakeCanvas implements NodeProvider {
                 drawFruit(gc, f);
             }
         });
-         System.out.println("Drawing background took after snakes and fruit " + (System.nanoTime() - startTime) / 1000000 + "ms");
+        System.out.println("Drawing background took after snakes and fruit " + (System.nanoTime() - startTime) / 1000000 + "ms");
     }
 
     public void drawSnake(GraphicsContext gc, Snake snake) {
@@ -70,8 +70,7 @@ public class SnakeCanvas implements NodeProvider {
         if (!snake.isDead()) {
             if (player.getSnake() == snake) {
                 gc.setFill(Color.web("00FF00"));
-            }
-            else {
+            } else {
                 gc.setFill(Color.web("0000FF"));
             }
         } else {
