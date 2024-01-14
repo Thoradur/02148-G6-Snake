@@ -2,7 +2,6 @@ package snake.state;
 
 import snake.common.Point;
 
-import java.util.List;
 import java.util.Random;
 import java.util.Stack;
 import java.util.stream.Stream;
@@ -47,16 +46,74 @@ public class Board {
         stream().map(Cell::getStack).forEach(Stack::clear);
 
         // Build all game objects
-        for (var gameObject : state.getGameObjects()) {
-            gameObject.build(this);
-        }
+        state.getGameObjects().forEach(gameObject -> gameObject.build(this));
 
-        for (var gameObject : state.getGameObjects()) {
-            if (gameObject instanceof Snake s) {
-                s.collision(this);
+        collisionCheck();
+        removeEatenFruit();
+        spawnFruitAlgorithm();
+    }
+
+    private void collisionCheck() {
+        // Find all non-dead snakes
+        state.getGameObjects().stream().filter(o -> {
+            if (o instanceof Snake s) {
+                return !s.isDead();
             }
-        }
 
+            return false;
+        }).forEach(o -> {
+            var snake = (Snake) o;
+
+            // Skip already dead snakes.
+            if (snake.isDead()) return;
+
+            var head = snake.getHead();
+            var headCell = getCell(head);
+
+            // Get copy
+            var stack = (Stack<?>) headCell.getStack().clone();
+
+            // Filter out first element
+            stack.stream().filter(gameObject -> gameObject == snake).findFirst().ifPresent(stack::remove);
+
+            // Check if any snakes are in the same cell as the head
+            var additionalSnakes = stack.stream().filter(go -> go instanceof Snake).map(go -> (Snake) go).toList();
+
+            for (var otherSnake : additionalSnakes) {
+                // If we hit any other snake in their heads, kill them
+                if (otherSnake.getHead().equals(head)) {
+                    System.out.println("Snake has collided with another snake");
+                    otherSnake.kill();
+                }
+            }
+
+            // If any other snake block is on the same block
+            // as our head, we die.
+            if (!additionalSnakes.isEmpty()) {
+                System.out.println("Snake has collided with another snake");
+
+                // Give points to the top snake
+                var topSnake = additionalSnakes.getFirst();
+                topSnake.grow(snake.size());
+
+                snake.kill();
+                return;
+            }
+
+            // Find all fruits in the same cell as the head
+            var fruits = stack.stream().filter(go -> go instanceof Fruit).map(go -> (Fruit) go).toList();
+
+            // Eat fruits we can eat.
+            for (var fruit : fruits) {
+                if (fruit.isEaten()) continue;
+
+                fruit.eat();
+                snake.grow(fruit.getPoints());
+            }
+        });
+    }
+
+    private void spawnFruitAlgorithm() {
         // Count the amount of fruits on the board
         var fruitCount = state.getGameObjects().stream().filter(gameObject -> gameObject instanceof Fruit).count();
 
@@ -75,10 +132,19 @@ public class Board {
             // Pick a random empty cell
             var randomCell = emptyCells.get(currentRandom.nextInt(emptyCells.size()));
 
-            var fruit = new Fruit(randomCell.position);
+            // TODO: More fruits with rarities.
+            var fruit = new Apple(randomCell.position);
 
             this.state.getGameObjects().add(fruit);
         }
+    }
+
+    private void removeEatenFruit() {
+        // Find all fruits
+        var fruits = state.getGameObjects().stream().filter(gameObject -> gameObject instanceof Fruit).map(gameObject -> (Fruit) gameObject).toList();
+
+        // Remove all eaten fruits
+        fruits.stream().filter(Fruit::isEaten).forEach(state.getGameObjects()::remove);
     }
 
     public Stream<Cell> stream() {

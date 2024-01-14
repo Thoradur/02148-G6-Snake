@@ -5,15 +5,30 @@ import java.util.Random;
 import snake.common.Point;
 import snake.protocol.state.StateUpdate;
 
-public class Fruit implements GameObject {
+public abstract class Fruit implements GameObject {
     private final Point position;
+    private final int points;
+    private boolean eaten = false;
 
-    public Fruit(Point position) {
+    public Fruit(Point position, int points) {
         this.position = position;
+        this.points = points;
     }
 
     public Point getPosition() {
         return position;
+    }
+
+    public void eat() {
+        eaten = true;
+    }
+
+    public boolean isEaten() {
+        return eaten;
+    }
+
+    public int getPoints() {
+        return points;
     }
 
     @Override

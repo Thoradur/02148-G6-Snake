@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import org.openjfx.NodeProvider;
 import org.openjfx.snake.SnakeScene;
 import snake.coordination.CoordinationClient;
@@ -47,6 +48,9 @@ public class InLobbyNode implements NodeProvider {
                 err.printStackTrace();
             }
         });
+
+        var obj = new Text("hek");
+
 
         var box = new VBox(readyButton, leaveButton);
         box.setAlignment(Pos.CENTER);

@@ -40,12 +40,15 @@ public class Snake implements GameObject {
     }
 
     public void step() {
-        System.out.println("Snake is stepping in direction: " + this.direction);
+        if (isDead) return;
+
         snake.addFirst(getHead().add(this.direction));
         snake.removeLast();
     }
 
     public void grow(int size) {
+        if (isDead) return;
+
         boolean isGrowing = size > 0;
 
         IntStream.range(0, Math.abs(size)).forEach(i -> {
@@ -66,41 +69,6 @@ public class Snake implements GameObject {
 
     public void kill() {
         isDead = true;
-    }
-
-    public void collision(Board board) {
-        Cell headCell = board.getCell(getHead());
-
-        // Check for collision with other snakes
-        for (var gameObject : headCell.getStack()) {
-            if (gameObject instanceof Snake otherSnake) {
-                if (otherSnake != this) {
-                    System.out.println("Snake has collided with another snake");
-                    kill();
-                    // Handle collision with another snake
-                    return;
-                }
-            }
-        }
-
-        // Check for collision with itself
-        for (var point : snake) {
-            if (point != getHead() && point.equals(getHead())) {
-                System.out.println("Snake has collided with itself");
-                isDead = true;
-                // Handle self-collision
-                return;
-            }
-        }
-
-        // Check for collision with fruit
-        for (var gameObject : headCell.getStack()) {
-            // Handle collision with fruit
-            if (gameObject instanceof Fruit f) {
-                grow(1);
-                board.getState().getGameObjects().remove(f);
-            }
-        }
     }
 
     public void setDirection(Direction direction) {
