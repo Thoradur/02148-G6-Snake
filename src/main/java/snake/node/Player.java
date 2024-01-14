@@ -96,6 +96,11 @@ public class Player implements Runnable {
                     continue;
                 }
 
+                board.build();
+
+                // Call draw on the canvas
+                SceneManager.getInstance().getSceneProvider(SnakeScene.class).getSnakeCanvas().draw();
+
                 long delta = System.currentTimeMillis() - time;
 
                 if (delta < minimumDelta) {
@@ -111,13 +116,8 @@ public class Player implements Runnable {
                     return true;
                 });
 
-                board.build();
-
                 var stateUpdate = new StateUpdate(state.getStep(), snake.getDirection(), snake.getDehydratedSnake().toArray(new Point[0]));
                 sendStateUpdate(stateUpdate);
-
-                // Call draw on the canvas
-                SceneManager.getInstance().getSceneProvider(SnakeScene.class).getSnakeCanvas().draw();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
