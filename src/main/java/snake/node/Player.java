@@ -97,6 +97,11 @@ public class Player implements Runnable {
 
                     if (System.currentTimeMillis() - lastBuild > 1000) {
                         System.out.println("Waiting for opponents to connect for more than 1000");
+                        // MY step
+                        System.out.println("My step: " + state.getStep());
+
+                        // All my opponents step
+                        opponents.forEach(opponent -> System.out.println("Opponent step: " + opponent.getStep()));
                     }
 
                     continue;
