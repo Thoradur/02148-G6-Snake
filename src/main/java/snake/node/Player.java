@@ -82,7 +82,7 @@ public class Player implements Runnable {
         opponents.stream().map(Thread::new).forEach(Thread::start);
 
         long minimumDelta = 250;
-        long lastBuild;
+        long lastBuild = System.currentTimeMillis();
 
         while (true) {
 
@@ -94,6 +94,11 @@ public class Player implements Runnable {
                 var allOpponentsReady = opponents.stream().map(Opponent::isReady).reduce(true, (a, b) -> a && b);
 
                 if (!allOpponentsReady) {
+
+                    if (System.currentTimeMillis() - lastBuild > 1000) {
+                        System.out.println("Waiting for opponents to connect for more than 1000");
+                    }
+
                     continue;
                 }
 
@@ -130,7 +135,6 @@ public class Player implements Runnable {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                break;
             }
         }
 
