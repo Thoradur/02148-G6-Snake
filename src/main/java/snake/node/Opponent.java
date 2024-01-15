@@ -18,10 +18,13 @@ public class Opponent {
     private final OpponentNode opponentNode;
     private final Thread opponentThread;
 
-    public Opponent(OpponentInfo opponentInfo, State state, SpaceRepository repository) throws IOException {
+    private final String playerNames;
+
+    public Opponent(OpponentInfo opponentInfo, State state, SpaceRepository repository, String playerNames) throws IOException {
         this.opponentInfo = opponentInfo;
         this.state = state;
         this.snake = new Snake(List.of(opponentInfo.startPosition()));
+        this.playerNames = playerNames;
         this.snake.setDirection(opponentInfo.startDirection());
         this.state.getGameObjects().add(this.snake);
 
@@ -29,6 +32,10 @@ public class Opponent {
         this.opponentThread = new Thread(opponentNode);
 
         repository.add(opponentInfo.playerSecret(), space);
+    }
+
+    public OpponentInfo getOpponentInfo() {
+        return opponentInfo;
     }
 
     public boolean isReady() {

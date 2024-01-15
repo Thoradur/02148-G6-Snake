@@ -4,6 +4,7 @@ import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
 import org.jspace.Space;
+import org.openjfx.startscreen.StartScreenNode;
 import snake.protocol.MessageSpace;
 import snake.protocol.coordination.*;
 
@@ -18,16 +19,19 @@ import java.util.UUID;
 
 public class CoordinationClient {
     private String playerId;
+    private String playerName;
     private URI playerURI;
     private URI coordinationServerUri;
     private RemoteSpace coordinationWaitingRoom;
     private RemoteSpace coordinationLobby;
+    static StartScreenNode startScreenNode = new StartScreenNode();
 
-    public CoordinationClient(String playerId, URI playerURI, URI coordinationServerUri) throws IOException {
+    public CoordinationClient(String playerId, URI playerURI, URI coordinationServerUri, String playerName) throws IOException {
         this.playerId = playerId;
         this.playerURI = playerURI;
         this.coordinationServerUri = coordinationServerUri;
         this.coordinationWaitingRoom = new RemoteSpace(coordinationServerUri);
+        this.playerName = playerName;
     }
 
     public String getPlayerId() {
@@ -38,9 +42,11 @@ public class CoordinationClient {
         return playerURI;
     }
 
+    public String getPlayerName(){ return playerName; }
+
     public void sendPlayerInfo() throws InterruptedException, InvocationTargetException, IllegalAccessException {
         var wrappedSpace = new MessageSpace(coordinationLobby);
-        wrappedSpace.put(new PlayerInfo(playerId, playerURI));
+        wrappedSpace.put(new PlayerInfo(playerId, playerURI, playerName));
     }
 
     public void ready() throws InterruptedException, InvocationTargetException, IllegalAccessException {
@@ -86,8 +92,9 @@ public class CoordinationClient {
         var playerId = UUID.randomUUID().toString();
         var port = new Random().nextInt(65535);
         var playerBaseUri = new URI("tcp://localhost:" + port + "/?keep");
+        var playerName = startScreenNode.playerName.getText();
 
-        var c = new CoordinationClient(playerId, playerBaseUri, new URI("tcp://localhost:8111/waiting?keep"));
+        var c = new CoordinationClient(playerId, playerBaseUri, new URI("tcp://localhost:8111/waiting?keep"), playerName);
 
         String lobbyId;
 

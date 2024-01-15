@@ -11,5 +11,5 @@ import java.net.URI;
  * @param playerSecret   The secret of the player
  */
 public record OpponentInfo(URI baseUri, Direction startDirection, Point startPosition, String opponentSecret,
-                           String playerSecret) {
+                           String playerSecret, String playerName) {
 }

@@ -66,7 +66,6 @@ public class CoordinationLobby implements Runnable {
                     if (players.containsKey(playerInfo.playerId())) continue;
 
                     players.put(playerInfo.playerId(), new PlayerConnection(playerInfo));
-
                 }
 
                 if (nextMessage instanceof LeaveLobby leaveLobby) {
@@ -162,7 +161,7 @@ public class CoordinationLobby implements Runnable {
                     if (playerId.equals(opponentId)) continue;
 
                     var playerInfo = players.get(opponentId).info;
-                    var opponentInfo = new OpponentInfo(playerInfo.baseUri(), initialDirections.get(opponentId), initialPositions.get(opponentId), playerSecretMap.get(playerId).get(opponentId), playerSecretMap.get(opponentId).get(playerId));
+                    var opponentInfo = new OpponentInfo(playerInfo.baseUri(), initialDirections.get(opponentId), initialPositions.get(opponentId), playerSecretMap.get(playerId).get(opponentId), playerSecretMap.get(opponentId).get(playerId), playerInfo.playerName());
 
                     opponentInfos.add(opponentInfo);
                 }

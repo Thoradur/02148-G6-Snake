@@ -16,12 +16,13 @@ public class MatchMakingScene implements SceneProvider {
     private CoordinationClient coordinationClient;
     private LobbyListNode lobbyListNode;
     private InLobbyNode inLobbyNode;
+    private String playerName;
 
-    public MatchMakingScene(String playerId, URI clientURI, URI serverURI) {
+    public MatchMakingScene(String playerId, URI clientURI, URI serverURI, String playerName) {
         this.scene = new Scene(root);
 
         try {
-            this.coordinationClient = new CoordinationClient(playerId, clientURI, URI.create("tcp://" + serverURI.getHost() + ":" + serverURI.getPort() + "/waiting?keep"));
+            this.coordinationClient = new CoordinationClient(playerId, clientURI, URI.create("tcp://" + serverURI.getHost() + ":" + serverURI.getPort() + "/waiting?keep"), playerName);
             this.inLobbyNode = new InLobbyNode(this.coordinationClient);
 
             this.lobbyListNode = new LobbyListNode(this.coordinationClient, () -> {

@@ -19,6 +19,7 @@ import java.util.UUID;
 public class StartScreenNode implements NodeProvider {
     private BorderPane root = new BorderPane();
     private GridPane grid = new GridPane();
+    public TextField playerName;
 
 
     public StartScreenNode() {
@@ -27,6 +28,7 @@ public class StartScreenNode implements NodeProvider {
         grid.setHgap(10);
 
         var matchMakingButton = new Button("Start matchmaking");
+        var playerName = new TextField("");
 
         var myHost = new TextField("localhost");
         var myPort = new TextField(SystemInfo.getClientPort().toString());
@@ -39,19 +41,23 @@ public class StartScreenNode implements NodeProvider {
             var matchMakingScene = new MatchMakingScene(
                     playerID,
                     URI.create("tcp://" + myHost.getText() + ":" + myPort.getText() + "/?keep"),
-                    URI.create(matchmakingServerURI.getText())
+                    URI.create(matchmakingServerURI.getText()),
+                    playerName.getText()
             );
 
             matchMakingScene.setActive();
         });
 
-        grid.add(new Text("Host"), 0, 0);
-        grid.add(myHost, 1, 0);
-        grid.add(new Text("Port"), 0, 1);
-        grid.add(myPort, 1, 1);
-        grid.add(new Text("Matchmaking Server URI"), 0, 2);
-        grid.add(matchmakingServerURI, 1, 2);
-        grid.add(matchMakingButton, 0, 3);
+        grid.add(new Text("Player name:"), 0,0);
+        grid.add(playerName, 1,0);
+
+        grid.add(new Text("Host"), 0, 2);
+        grid.add(myHost, 1, 2);
+        grid.add(new Text("Port"), 0, 3);
+        grid.add(myPort, 1, 3);
+        grid.add(new Text("Matchmaking Server URI"), 0, 4);
+        grid.add(matchmakingServerURI, 1, 4);
+        grid.add(matchMakingButton, 0, 5);
 
         root.setCenter(grid);
     }

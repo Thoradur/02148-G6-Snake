@@ -23,8 +23,13 @@ public class Player implements Runnable {
     private Snake snake;
     private SpaceRepository repository = new SpaceRepository();
     private final List<Opponent> opponents = new ArrayList<>();
+    //the names are in opponentInfo, thus we need another list
+    private final List<String> opponentNames = new ArrayList<String>();
 
-    public Player(URI uri, StartGame startGame) {
+
+    private String playerName;
+
+    public Player(URI uri, StartGame startGame, String playerName) {
         this.uri = uri;
         this.state = new State(startGame.seed());
         this.board = new Board(startGame.width(), startGame.height(), this.state);
@@ -37,8 +42,10 @@ public class Player implements Runnable {
 
         for (var opponentInfo : startGame.opponents()) {
             try {
-                var opponent = new Opponent(opponentInfo, state, repository);
+                var opponent = new Opponent(opponentInfo, state, repository, playerName);
                 opponents.add(opponent);
+                opponentNames.add(opponentInfo.playerName());
+                System.out.println(opponent.getOpponentInfo().playerName());
 
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -56,6 +63,13 @@ public class Player implements Runnable {
 
     public Snake getSnake() {
         return snake;
+    }
+
+    public List<Opponent> getOpponents() {
+        return opponents;
+    }
+    public List<String> getOpponentNames() {
+        return opponentNames;
     }
 
     public void sendStateUpdate(StateUpdate update) {
