@@ -2,15 +2,17 @@ package org.openjfx.snake;
 
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.canvas.*;
+//import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.*;
 import javafx.scene.paint.Color;
 import org.openjfx.NodeProvider;
 import snake.node.Player;
-import snake.state.Board;
-import snake.state.Snake;
-import snake.state.State;
-import snake.state.Fruit;
+import snake.state.*;
+
+import java.nio.IntBuffer;
+import java.util.Arrays;
+
 
 public class SnakeCanvas implements NodeProvider {
     private final Canvas canvas;
@@ -18,35 +20,56 @@ public class SnakeCanvas implements NodeProvider {
     private final Board board;
     private final Player player;
     public static final int CELL_SIZE = 10;
+    private final int W;
+    private final int H;
+    private final WritablePixelFormat<IntBuffer> pixelFormat = PixelFormat.getIntArgbPreInstance();
+
+    private final int[] backgroundBuffer;
 
     public SnakeCanvas(Player player) {
         this.state = player.getState();
         this.board = state.getBoard();
-        this.canvas = new Canvas(this.board.getWidth() * CELL_SIZE, this.board.getHeight() * CELL_SIZE);
+        W = board.getWidth() * CELL_SIZE;
+        H = board.getHeight() * CELL_SIZE;
+        this.canvas = new Canvas(W, H);
         this.player = player;
+        this.backgroundBuffer = new int[W * H];
+
+
+        var c1 = Color.web("bdc4b7");
+        var c2 = Color.web("cbd1c5");
+
+        for (int i = 0; i < W; i+=CELL_SIZE) {
+            for (int j = 0; j < H; j+= CELL_SIZE) {
+                int ci = (i/CELL_SIZE + j/CELL_SIZE) % 2 == 0 ? toInt(c1) : toInt(c2);
+                for (int dx = 0; dx < CELL_SIZE; dx++) {
+                    for (int dy = 0; dy < CELL_SIZE; dy++) {
+                        backgroundBuffer[i + dx + W * (j + dy)] = ci;
+                    }
+                }
+            }
+        }
+
+
+
     }
 
-    public int getCellSize() {
-        // return (int) Math.min(canvas.getHeight(), canvas.getWidth()) / board.getWidth();
-        return CELL_SIZE;
+    private int toInt(Color c) {
+        return
+                (255 << 24) |
+                        ((int) (c.getRed() * 255) << 16) |
+                        ((int) (c.getGreen() * 255) << 8) |
+                        ((int) (c.getBlue() * 255));
     }
+
 
     public void draw() {
         long startTime = System.nanoTime();
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        int cellSize = getCellSize();
+        PixelWriter p = gc.getPixelWriter();
 
         // Draws background
-        for (int i = 0; i < board.getWidth(); i++) {
-            for (int j = 0; j < board.getHeight(); j++) {
-                if ((i + j) % 2 == 0) {
-                    gc.setFill(Color.web("cbd1c5"));
-                } else {
-                    gc.setFill(Color.web("bdc4b7"));
-                }
-                gc.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
-            }
-        }
+        p.setPixels(0, 0, W, H, pixelFormat, backgroundBuffer, 0, W);
         System.out.println("Drawing background took " + (System.nanoTime() - startTime) / 1000000 + "ms");
 
         state.getGameObjects().forEach(gameObject -> {
@@ -61,8 +84,7 @@ public class SnakeCanvas implements NodeProvider {
     }
 
     public void drawSnake(GraphicsContext gc, Snake snake) {
-        int cellSize = getCellSize();
-
+        
         //draws snake
         if (!snake.isDead()) {
             if (player.getSnake() == snake) {
@@ -73,18 +95,18 @@ public class SnakeCanvas implements NodeProvider {
         } else {
             gc.setFill(Color.web("FF0000"));
         }
-        gc.fillRect(snake.getHead().x() * cellSize, snake.getHead().y() * cellSize, cellSize - 1, cellSize - 1);
+        gc.fillRect(snake.getHead().x() * CELL_SIZE, snake.getHead().y() * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1);
 
         var snakeBody = snake.getSnake();
         for (int i = 1; i < snakeBody.size(); i++) {
-            gc.fillRoundRect(snakeBody.get(i).x() * cellSize, snakeBody.get(i).y() * cellSize, cellSize - 1, cellSize - 1, 20, 20);
+            gc.fillRoundRect(snakeBody.get(i).x() * CELL_SIZE, snakeBody.get(i).y() * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1, 20, 20);
         }
     }
 
     public void drawFruit(GraphicsContext gc, Fruit fruit) {
-        int cellSize = getCellSize();
+
         gc.setFill(Color.web("FF0000"));
-        gc.fillRect(fruit.getPosition().x() * cellSize, fruit.getPosition().y() * cellSize, cellSize - 1, cellSize - 1);
+        gc.fillRect(fruit.getPosition().x() * CELL_SIZE, fruit.getPosition().y() * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1);
     }
 
     @Override
