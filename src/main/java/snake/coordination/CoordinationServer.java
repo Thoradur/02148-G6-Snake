@@ -24,7 +24,7 @@ public class CoordinationServer implements Runnable {
     private HashMap<String, CoordinationLobby> lobbies = new HashMap<>();
 
     public static void main(String[] args) throws URISyntaxException {
-        var s = new CoordinationServer(new URI("tcp://localhost:8111/?keep"));
+        var s = new CoordinationServer(new URI("tcp://0.0.0.0:8111/?keep"));
         s.run();
     }
 

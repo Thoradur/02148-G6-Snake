@@ -89,6 +89,7 @@ public class Opponent implements Runnable {
 
 
             } catch (Exception e) {
+                e.printStackTrace();
                 System.out.println("Got error of type: " + e.getMessage());
             }
         }

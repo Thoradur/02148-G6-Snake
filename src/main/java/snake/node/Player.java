@@ -1,5 +1,6 @@
 package snake.node;
 
+import javafx.application.Platform;
 import org.jspace.SpaceRepository;
 import org.openjfx.SceneManager;
 import org.openjfx.snake.SnakeScene;
@@ -81,9 +82,9 @@ public class Player implements Runnable {
         opponents.stream().map(Thread::new).forEach(Thread::start);
 
         long minimumDelta = 250;
+        long lastBuild;
 
         while (true) {
-            long time = System.currentTimeMillis();
 
             try {
                 // Sleep for 1/60th of a second
@@ -96,12 +97,15 @@ public class Player implements Runnable {
                     continue;
                 }
 
+                lastBuild = System.currentTimeMillis();
+
                 board.build();
 
                 // Call draw on the canvas
                 SceneManager.getInstance().getSceneProvider(SnakeScene.class).getSnakeCanvas().draw();
 
-                long delta = System.currentTimeMillis() - time;
+                // Ensure minimum delta
+                long delta = System.currentTimeMillis() - lastBuild;
 
                 if (delta < minimumDelta) {
                     Thread.sleep(minimumDelta - delta);
@@ -125,9 +129,14 @@ public class Player implements Runnable {
                 }
 
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
+                break;
             }
-
         }
+
+        // Exit everything
+
+        Platform.exit();
+        System.exit(0);
     }
 }

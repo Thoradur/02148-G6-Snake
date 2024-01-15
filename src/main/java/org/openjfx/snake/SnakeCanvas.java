@@ -34,8 +34,6 @@ public class SnakeCanvas implements NodeProvider {
     public void draw() {
         long startTime = System.nanoTime();
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         int cellSize = getCellSize();
 
         // Draws background
@@ -79,8 +77,7 @@ public class SnakeCanvas implements NodeProvider {
 
         var snakeBody = snake.getSnake();
         for (int i = 1; i < snakeBody.size(); i++) {
-            gc.fillRoundRect(snakeBody.get(i).x() * cellSize, snakeBody.get(i).y() * cellSize, cellSize - 1,
-                    cellSize - 1, 20, 20);
+            gc.fillRoundRect(snakeBody.get(i).x() * cellSize, snakeBody.get(i).y() * cellSize, cellSize - 1, cellSize - 1, 20, 20);
         }
     }
 
