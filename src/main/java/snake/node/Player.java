@@ -135,7 +135,6 @@ public class Player implements Runnable {
         }
 
         // Exit everything
-
         Platform.exit();
         System.exit(0);
     }

@@ -71,7 +71,7 @@ public class Opponent implements Runnable {
             try {
                 // Get next state update
                 var stateUpdate = (StateUpdate) messageSpace.get(new StateUpdate(this.step + 1, null, null));
-                this.step++;
+                this.step = stateUpdate.step();
 
                 System.out.println("Received state update: " + stateUpdate.step() + " - " + Arrays.toString(stateUpdate.compactSnake()));
 
@@ -86,13 +86,13 @@ public class Opponent implements Runnable {
 
                     this.snake.kill();
                 }
-
-
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println("Got error of type: " + e.getMessage());
+                break;
             }
         }
+
+        this.snake.kill();
 
         System.out.println("Opponent is dead, exiting");
     }
