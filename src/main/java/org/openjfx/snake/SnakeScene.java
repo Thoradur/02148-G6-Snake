@@ -45,7 +45,7 @@ public class SnakeScene implements SceneProvider {
 
             if (nextDirection != null && !player.getSnake().getDirection().isOpposite(nextDirection)) {
                 player.getSnake().setDirection(nextDirection);
-                System.out.println("Changing direction to " + nextDirection);
+                // System.out.println("Changing direction to " + nextDirection);
             }
         });
     }

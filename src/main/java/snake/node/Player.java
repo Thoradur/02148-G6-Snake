@@ -68,7 +68,7 @@ public class Player implements Runnable {
             }
         });
 
-        System.out.println("Sent state update: " + update.step() + " - " + Arrays.toString(update.compactSnake()));
+        // System.out.println("Sent state update: " + update.step() + " - " + Arrays.toString(update.compactSnake()));
     }
 
     @Override

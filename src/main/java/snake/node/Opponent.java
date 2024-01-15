@@ -73,7 +73,7 @@ public class Opponent implements Runnable {
                 var stateUpdate = (StateUpdate) messageSpace.get(new StateUpdate(this.step + 1, null, null));
                 this.step++;
 
-                System.out.println("Received state update: " + stateUpdate.step() + " - " + Arrays.toString(stateUpdate.compactSnake()));
+                // System.out.println("Received state update: " + stateUpdate.step() + " - " + Arrays.toString(stateUpdate.compactSnake()));
 
                 var prevHead = this.snake.getHead();
 
@@ -81,8 +81,8 @@ public class Opponent implements Runnable {
                 this.snake.setDirection(stateUpdate.direction());
 
                 if (prevHead.distanceTo(this.snake.getHead()) > 1) {
-                    System.out.println("prev: " + prevHead + " new head: " + this.snake.getHead());
-                    System.out.println("Snake moved more than one step, killing.");
+                    // System.out.println("prev: " + prevHead + " new head: " + this.snake.getHead());
+                    // System.out.println("Snake moved more than one step, killing.");
 
                     this.snake.kill();
                 }

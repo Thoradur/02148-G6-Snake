@@ -49,21 +49,21 @@ public class SnakeCanvas implements NodeProvider {
                 gc.fillRect(i * cellSize, j * cellSize, cellSize, cellSize);
             }
         }
-        System.out.println("Drawing background took " + (System.nanoTime() - startTime) / 1000000 + "ms");
+        // System.out.println("Drawing background took " + (System.nanoTime() - startTime) / 1000000 + "ms");
 
         state.getGameObjects().forEach(gameObject -> {
             if (gameObject instanceof Snake s) {
-                drawSnake(gc, s);
+                drawSnake(gc, s, cellSize);
             }
             if (gameObject instanceof Fruit f) {
-                drawFruit(gc, f);
+                drawFruit(gc, f, cellSize);
             }
         });
-        System.out.println("Drawing background took after snakes and fruit " + (System.nanoTime() - startTime) / 1000000 + "ms");
+        // System.out.println("Drawing background took after snakes and fruit " + (System.nanoTime() - startTime) / 1000000 + "ms");
     }
 
-    public void drawSnake(GraphicsContext gc, Snake snake) {
-        int cellSize = getCellSize();
+    public void drawSnake(GraphicsContext gc, Snake snake, int cellSize) {
+        // int cellSize = getCellSize();
 
         //draws snake
         if (!snake.isDead()) {
@@ -84,9 +84,10 @@ public class SnakeCanvas implements NodeProvider {
         }
     }
 
-    public void drawFruit(GraphicsContext gc, Fruit fruit) {
-        int cellSize = getCellSize();
-        gc.setFill(Color.web("FF0000"));
+    public void drawFruit(GraphicsContext gc, Fruit fruit, int cellSize) {
+        // int cellSize = getCellSize();
+        System.out.println(cellSize);
+        gc.setFill(Color.web("FF69B4"));
         gc.fillRect(fruit.getPosition().x() * cellSize, fruit.getPosition().y() * cellSize, cellSize - 1, cellSize - 1);
     }
 
