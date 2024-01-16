@@ -107,6 +107,7 @@ public class CoordinationClient {
             lobbyId = lobbies[0];
         } else {
             lobbyId = c.createLobby().lobbyId();
+
         }
 
 
