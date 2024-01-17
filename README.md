@@ -18,7 +18,7 @@ Its entrypoint can be found in the "snake.coordination.CoordinationServer" main 
 Alternatively it can be run through your preferred IDE or with maven:
 
 ```bash
-mvn exec:java -Dexec.mainClass="snake.coordination.CoordinationServer"
+mvn exec:java -D"exec.mainClass"="snake.coordination.CoordinationServer"
 ```
 
 It will start the coordination server on port 8111 listening by default on 0.0.0.0. Which can be confirmed
