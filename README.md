@@ -56,4 +56,4 @@ to its opponents and the game is off.
 
 > TIP: Full screen the game to see the entire board and prevent going out of bounds.
 
-The game never ends.
+The game never ends, except when you die.
