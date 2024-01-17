@@ -1,5 +1,7 @@
 # P2P Snake Game
 
+Github repository <https://github.com/Thoradur/02148-G6-Snake>
+
 ## How to run
 
 Firstly, ensure you have compiled the most recent version of the game, if you are using the maven commands to run the
