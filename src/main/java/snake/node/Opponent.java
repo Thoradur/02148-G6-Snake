@@ -75,6 +75,7 @@ public class Opponent implements Runnable {
 
                 System.out.println("Received state update: " + stateUpdate.step() + " - " + Arrays.toString(stateUpdate.compactSnake()));
 
+                var prevSize = this.snake.size();
                 var prevHead = this.snake.getHead();
 
                 this.snake.setDehydratedSnake(Arrays.asList(stateUpdate.compactSnake()));
@@ -86,6 +87,12 @@ public class Opponent implements Runnable {
 
                     this.snake.kill();
                 }
+
+                if (this.snake.size() - prevSize > 1) {
+                    System.out.println("Snake grew more than one step, killing.");
+                    this.snake.kill();
+                }
+
             } catch (Exception e) {
                 e.printStackTrace();
                 break;
